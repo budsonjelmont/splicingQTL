@@ -1,0 +1,19 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkPCA
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 0:20
+#BSUB -R rusage[mem=40000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/plinkPCA_%J_output.txt
+
+module load plink/1.90
+ml bcftools
+ml vcftools
+
+vcfPath='/sc/orga/work/belmoj01/sqtl/genodir/Capstone4VCFreformat/'
+vcfFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5.deduped.highLDexcl.indep1500_150_.2.vcf.gz'
+outPath='/sc/orga/projects/EPIASD/splicingQTL/PCA/plinkPCAresults/Capstone4.sel.idsync.--thin-count1000000/'
+
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --thin-count 1000000 --pca 'header' --out ${outPath}${vcfFile}

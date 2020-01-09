@@ -1,0 +1,18 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J runVarPt
+#BSUB -q private
+#BSUB -m bashia02
+#BSUB -n 21
+#BSUB -W 3:00
+#BSUB -R rusage[mem=25360]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/runVarPt%J_output.txt
+
+resultsDir='/sc/orga/projects/EPIASD/splicingQTL/varPart/results/092419_20genoPCS_minCovars+seqPC9_noHCP_lambda1.1.1/'
+
+module load R
+
+Rscript /sc/orga/projects/EPIASD/splicingQTL/varPart/check_covars_varPt_minCovars.R
+mv varPart ${resultsDir}
+mv varpart_* ${resultsDir}
+mv .Rdata ${resultsDir}

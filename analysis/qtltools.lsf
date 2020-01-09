@@ -1,0 +1,30 @@
+#!/bin/bash
+## To run: bsub [options] < this_scripts_name
+#BSUB -J qtltools_fenrich
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 0:45
+#BSUB -R rusage[mem=50000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/qtltools_fenrich_%J_output.txt
+
+ml qtltools
+
+#snpdir='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/'
+#snpfile='significant_sqtl.bed' #Note this file HAS redundancies--check if this is ok
+#phenodir=${snpdir}
+#phenofile='allphenos.bed'
+#annotdir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/'
+#annotfile='gencode.v19.basic.annotation_500downstreamOnly.bed'
+#resdir=${snpdir}qtlTools_results/
+
+snpdir='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/'
+snpdir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/'
+snpfile='DER-10a_hg19_isoQTL.significant.txt.bed' #Note this file HAS redundancies--check if this is ok
+phenodir=${snpdir}
+phenofile='isoqtl_pheno_tscript.bed'
+annotdir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/'
+annotfile='gencode.v19.basic.annotation_500upstreamOnly.bed'
+resdir=${snpdir}qtlTools_results/
+
+QTLtools fenrich --qtl ${snpdir}${snpfile} --tss ${phenodir}${phenofile} --bed ${annotdir}${annotfile} --out ${resdir}gencodeV19500upstreamOnly_qtltools_enrich.txt

@@ -1,0 +1,25 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkClean
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 0:10
+#BSUB -R rusage[mem=40000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/cleanVCF_HWE_%J_output.txt
+
+module load plink/1.90
+module load python/3.7.3
+
+#vcfPath='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/'
+vcfPath='/sc/orga/scratch/belmoj01/splicingQTL/'
+vcfFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1'
+vcfHWEOutFile=${vcfFile}'.hwe1e-5'
+
+# Get HWE pvals for Control samples only
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --keep-fam /sc/orga/projects/EPIASD/splicingQTL/meta_matchedIDs_CTLonly.csv --hardy -out HWEpvals
+# Make file of IDs to exclude based on HWE pval
+python3 makeHWEexclude.py HWEpvals.hwe 0.00001
+# Drop variants in ALL samples that are not in HWE
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --exclude hwe_excludes.out --out ${vcfPath}${vcfHWEOutFile} --recode vcf-iid
+

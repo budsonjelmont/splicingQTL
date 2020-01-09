@@ -1,0 +1,25 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkClean
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 0:20
+#BSUB -R rusage[mem=40000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/cleanVCF_dropDupesForPeddy_%J_output.txt
+
+module load plink/1.90
+ml python/3.7.3
+
+#vcfPath='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/'
+vcfPath='/sc/orga/scratch/belmoj01/splicingQTL/'
+vcfFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5'
+
+# Generate missing genotype stats
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --missing --out ${vcfFile}.missingStats
+# Make relatedness report
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --genome --out ${vcfFile}.relatedness
+# Make list of people to drop
+python3 makeRelatedExcludeList.py ${vcfFile}.missingStats.imiss ${vcfFile}.relatedness.genome
+# Drop them
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --remove SamplesToExcludeForPCA.txt --out ${vcfPath}${vcfFile}.deduped --recode vcf-iid

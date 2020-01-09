@@ -1,0 +1,21 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkClean
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 0:12
+#BSUB -R rusage[mem=40000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/cleanVCF_QC_%J_output.txt
+
+module load plink/1.90
+ml bcftools
+ml vcftools
+
+vcfPath='/sc/orga/projects/EPIASD/PsychENCODE_phase12_genotypes/Capstone4VCFreformat/'
+vcfFile='Capstone4.sel.idsync.vcf'
+#vcfOutPath='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/'
+vcfOutPath='/sc/orga/scratch/belmoj01/splicingQTL/'
+vcfQCedFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1'
+
+plink --vcf ${vcfPath}${vcfFile} --double-id --biallelic-only --maf 0.05 --mind 0.01 --geno 0.01 --out ${vcfOutPath}${vcfQCedFile} --recode vcf-iid

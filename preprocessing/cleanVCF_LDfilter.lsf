@@ -1,0 +1,22 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkClean
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 00:10
+#BSUB -R rusage[mem=40000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/cleanVCF_LD_%J_output.txt
+
+module load plink/1.90
+ml bcftools
+ml vcftools
+
+vcfPath='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/'
+vcfFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5'
+vcfLDOutFile=${vcfFile}.highLDexcl.indep1500_150_.2
+
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --indep-pairwise 1500 150 0.2
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --make-set /sc/orga/work/belmoj01/sqtl/lsf/high_ld_and_autsomal_regions.txt --write-set --out hild
+plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --extract plink.prune.in --exclude hild.set --out ${vcfPath}${vcfLDOutFile} --recode vcf-iid
+

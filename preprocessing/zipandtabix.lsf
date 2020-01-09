@@ -1,0 +1,15 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J ZipItUp
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 16
+#BSUB -W 1:20
+#BSUB -R rusage[mem=40000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/zip_and_tab_it_%J_output.txt
+
+module load plink/1.90
+ml bcftools
+
+bgzip /sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5.vcf
+tabix -p vcf /sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5.vcf.gz
