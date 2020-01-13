@@ -3,11 +3,13 @@ library(ggplot2)
 res = list('introns_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19intronsOnly_qtltools_enrich.txt',
   'exons_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19exonsOnly_qtltools_enrich.txt',
   'coding_exons_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19codingexonsOnly_qtltools_enrich.txt',
+  '5000bp_downstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV195000downstreamOnly_qtltools_enrich.txt',
   '2000bp_downstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV192000downstreamOnly_qtltools_enrich.txt',
   '1000bp_downstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV191000downstreamOnly_qtltools_enrich.txt',
   '750bp_downstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19750downstreamOnly_qtltools_enrich.txt',
   '500bp_downstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19500downstreamOnly_qtltools_enrich.txt',
   '250bp_downstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19250downstreamOnly_qtltools_enrich.txt',
+  '5000bp_upstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV195000upstreamOnly_qtltools_enrich.txt',
   '2000bp_upstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV192000upstreamOnly_qtltools_enrich.txt',
   '1000bp_upstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV191000upstreamOnly_qtltools_enrich.txt',
   '750bp_upstream_only'='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/qtlTools_results/gencodeV19750upstreamOnly_qtltools_enrich.txt',
@@ -39,6 +41,7 @@ p = ggplot(df, aes(region,enrichment, fill=-log10(pval))) +
   #scale_fill_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 1, limits=c(0,20)) +
   scale_fill_gradient(low = 'white', high = 'red', limits=c(0,20)) +
   theme(
+    plot.title = element_text(hjust = 0.5),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
     axis.text.x = element_text(angle = 90, margin=margin(0,22,0,0,'pt'), color='black', size=10, hjust=1),
@@ -50,10 +53,10 @@ p = ggplot(df, aes(region,enrichment, fill=-log10(pval))) +
     legend.justification = c(1, 0),
 #    legend.text.align = 0.5,
 #    legend.title = element_text(hjust = -2.5, vjust = 1.6),
-    legend.position = c(0.04, -0.25),
-    legend.direction = 'horizontal'
+    legend.position = c(0.02, -0.25),
+    legend.direction = 'vertical'
   ) +
-  guides(fill = guide_colorbar(barwidth = 6, barheight = 1,
+  guides(fill = guide_colorbar(barwidth = 1, barheight = 6,
     title.position = 'top', title.hjust = 0.5))
 
 plot(p)
