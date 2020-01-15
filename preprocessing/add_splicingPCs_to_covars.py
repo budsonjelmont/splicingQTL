@@ -1,7 +1,7 @@
 import pandas as pd
 
-covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar/leafcutter-input_covar.20genoPCs.idsync'
-sqtlpcsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/pheno/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.PCs'
+covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar_wasp/leafcutter-input_covar.20genoPCs.idsync'
+sqtlpcsfile = '/sc/hydra/scratch/belmoj01/splicingQTL/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.05_perind.counts.idsync.deduped.gz.PCs'
 newcovarsfile = covarsfile + '.10splicingPCs.txt'
 
 covars = pd.read_csv(covarsfile + '.txt', sep='\t')
