@@ -3,8 +3,8 @@ import pandas as pd
 import glob
 
 phenoDir='/sc/hydra/scratch/belmoj01/splicingQTL/'
-phenoFile='out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.05_perind.counts.idsync.deduped.gz.qqnorm_AllCombined'
-combojuncFile='/sc/orga/projects/pintod02b/capstone/leafcutter/data-freeze4/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01/junctions/all_juncs_combined.junc'
+phenoFile='out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_allChr'
+combojuncFile='/sc/hydra/projects/pintod02c/WASP_leafcutter/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01/junctions/all_juncs_combined.junc'
 
 juncpath = '/sc/orga/projects/pintod02b/capstone/leafcutter/data-freeze4/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01/junctions'
 all_juncs = glob.glob(juncpath + '/*.junc')
@@ -29,13 +29,22 @@ pheno = pd.read_csv(phenoDir + phenoFile, sep='\s+')
 
 # Make first 4 BED columns (feature chr, start, end, ID)
 bed = pheno[['start','end','ID']] 
-bed.insert(0, 'chr', pheno['#Chr'].str.split(':',expand=True)[1].str.strip())
+
+#bed.insert(0, 'chr', pheno['#Chr'].str.split(':',expand=True)[1].str.strip())
+bed.insert(0, 'chr', pheno['#Chr'])
+
+# Remove any rows that are artifacts of file concatenation
+bed = bed.loc[bed['chr']!='#Chr']
+
+# Type conversion
+bed['start'] = bed['start'].astype(int)
 
 # 4th column is dummy column of top variants -- I use a single variant ID for all entries
 bed[4] = 'whatever'
 
 # The 'end' coordinate in the junction file seems to be 1 greater than the .junc file coordinate
-bed['end-1'] = bed['end']-1
+bed['end-1'] = bed['end'].astype(int)-1
+#bed['end-1'] = bed['end'].astype(int)
 
 # Get strand orientation (column 5 in .junc file) by joining to FIRST MATCH in .junc file
 leftjoined = bed.merge(junc, how='left', left_on=['chr','start','end-1'], right_on=[0,1,2])
