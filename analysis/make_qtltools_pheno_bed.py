@@ -37,7 +37,9 @@ bed.insert(0, 'chr', pheno['#Chr'])
 bed = bed.loc[bed['chr']!='#Chr']
 
 # Type conversion
+bed['chr'] = bed['chr'].astype(str)
 bed['start'] = bed['start'].astype(int)
+junc[0] = junc[0].astype(str)
 
 # 4th column is dummy column of top variants -- I use a single variant ID for all entries
 bed[4] = 'whatever'
@@ -53,5 +55,4 @@ bed = leftjoined.groupby(['chr','start','end'])[['ID','4_x',5]].first().reset_in
 print(str(bed.loc[~pd.isna(bed[5])].shape[0]) + ' rows out of ' + str(bed.shape[0]) + 'matched to a .junc file intron')
 bed = bed.loc[~pd.isna(bed[5])]
 
-# Write bedfile out
 bed.to_csv(phenoDir + 'Phenotype.bed', index=False, header=False, sep='\t')
