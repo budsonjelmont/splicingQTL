@@ -11,7 +11,6 @@ PED <- data.frame(read.table("20130606_g1k.ped", header=TRUE, skip=0, sep="\t"))
 PED <- PED[which(PED$Individual.ID %in% rownames(eigenvec)), ]
 PED <- PED[match(rownames(eigenvec), PED$Individual.ID),]
 all(PED$Individual.ID == rownames(eigenvec)) == TRUE
-[1] TRUE
 
 # set colours
 #BiocManager::install("RColorBrewer")
