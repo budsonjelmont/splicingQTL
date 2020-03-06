@@ -1,0 +1,32 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J gencode_overlaps
+#BSUB -P acc_pintod02b
+#BSUB -q premium
+#BSUB -n 1
+#BSUB -W 0:10
+#BSUB -R rusage[mem=12000]
+#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/gencode_overlaps_output_%J.txt
+
+snpDir='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/'
+snpFile='significant_sqtl.uniqueSNPs.bed'
+resDir=${snpDir}'gencodeOverlaps/'
+
+annotBedDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/'
+bedFiles=('gencode.v19.basic.annotation_3UTRexonsOnly.bed' 'gencode.v19.basic.annotation_5UTRexonsOnly.bed' 'gencode.v19.basic.annotation_codingExonsOnly.bed' 'gencode.v19.basic.annotation_intronsOnly.bed' 'gencode.v19.basic.annotation_80upstreamOnly.bed') 
+
+ml bedtools
+
+mkdir -p ${resDir}
+
+for bed in "${bedFiles[@]}"
+do
+  suffix="$(cut -d'_' -f2 <<< $bed)"
+  echo $suffix
+  bed=${annotBedDir}$bed
+  bedtools intersect -u -s -a ${snpDir}${snpFile} -b $bed > ${resDir}sqtlSNPs_overlap_${suffix}
+done
+
+# Run R script to tabulate & plot results
+ml R
+Rscript compilegencodeoverlaps.R ${snpDir}${snpFile} ${resDir}
