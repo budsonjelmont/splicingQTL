@@ -8,8 +8,10 @@
 #BSUB -R rusage[mem=12000]
 #BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/gencode_overlaps_output_%J.txt
 
-snpDir='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/'
-snpFile='significant_sqtl.uniqueSNPs.bed'
+#snpDir='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/'
+#snpFile='significant_sqtl.uniqueSNPs.bed'
+snpDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/'
+snpFile='DER-10b_hg19_isoQTL.FPKM5.all.txt.uniqueSNPs.bed'
 resDir=${snpDir}'gencodeOverlaps/'
 
 annotBedDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/'

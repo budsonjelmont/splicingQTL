@@ -1,7 +1,9 @@
 # Read all BEDTOOLs overlaps for each Gencode region and annotate which overlaps each SNP is found in. De-redundinate as necessary, then summarize results
+args = commandArgs(trailingOnly=TRUE)
 
 snpfile = args[1] #'/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/significant_sqtl.uniqueSNPs.bed'
 overlapdir = args[2] #'/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/gencodeOverlaps/'
+# OR /sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/gencodeOverlaps/
 
 snps = read.table(snpfile, sep='\t',col.names=c('chr','start','end','snp_id','clust_id','strand'))
 
@@ -75,6 +77,5 @@ rownames(regiondf)=regiondf[,'region']
 write.table(regiondf, paste0(overlapdir,'../gencode_region_summary.csv'), sep=',', col.names=T, row.names=F, quote=F)
  
 # Make table of region counts
-table(snps[categories])
 # Make summary plot
 library(ggplot2)
