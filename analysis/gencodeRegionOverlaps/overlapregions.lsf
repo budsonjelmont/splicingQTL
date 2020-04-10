@@ -10,12 +10,14 @@
 
 #snpDir='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/'
 #snpFile='significant_sqtl.uniqueSNPs.bed'
-snpDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/'
-snpFile='DER-10b_hg19_isoQTL.FPKM5.all.txt.uniqueSNPs.bed'
+#snpDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/'
+#snpFile='DER-10b_hg19_isoQTL.FPKM5.all.txt.uniqueSNPs.bed'
+snpDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/Walker2018_data/'
+snpFile='WalkerCell_significantSQTLS.uniqueSNPs.dummycols.bed'
 resDir=${snpDir}'gencodeOverlaps/'
 
 annotBedDir='/sc/orga/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/'
-bedFiles=('gencode.v19.basic.annotation_3UTRexonsOnly.bed' 'gencode.v19.basic.annotation_5UTRexonsOnly.bed' 'gencode.v19.basic.annotation_codingExonsOnly.bed' 'gencode.v19.basic.annotation_intronsOnly.bed' 'gencode.v19.basic.annotation_80upstreamOnly.bed') 
+bedFiles=('gencode.v19.basic.annotation_3UTRexonsOnly.bed' 'gencode.v19.basic.annotation_5UTRexonsOnly.bed' 'gencode.v19.basic.annotation_exonsOnly.bed' 'gencode.v19.basic.annotation_intronsOnly.bed' 'gencode.v19.basic.annotation_80upstreamOnly.bed') 
 
 ml bedtools
 
@@ -26,7 +28,7 @@ do
   suffix="$(cut -d'_' -f2 <<< $bed)"
   echo $suffix
   bed=${annotBedDir}$bed
-  bedtools intersect -u -s -a ${snpDir}${snpFile} -b $bed > ${resDir}sqtlSNPs_overlap_${suffix}
+  bedtools intersect -u -a ${snpDir}${snpFile} -b $bed > ${resDir}sqtlSNPs_overlap_${suffix}
 done
 
 # Run R script to tabulate & plot results

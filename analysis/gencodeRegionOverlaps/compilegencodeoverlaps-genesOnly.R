@@ -35,37 +35,13 @@ rownames(res) = 1:nrow(res)
 # Merge
 snps = merge(snps, as.data.frame(res), by='row.names', all=TRUE)
 
-# Get counts of TRUE values across each row
-snps['nregions'] = rowSums(snps[,c(as.character(catdf$categories))])
+# Change column names
+categories = c('inGene','outsideGene')
 
-# Clean data by ordering columns and returning the first TRUE value you encounter in the list
-#categories = factor(categories,levels=c('intronsOnly','codingExonsOnly','3UTRexonsOnly','5UTRexonsOnly','80upstreamOnly'))
-#categories = c('intronsOnly','codingExonsOnly','3UTRexonsOnly','5UTRexonsOnly','80upstreamOnly')
-categories = c('intronsOnly','3UTRexonsOnly','5UTRexonsOnly','exonsOnly','80upstreamOnly')
+colnames(snps)[8] = categories[1]
 
-cleaned = t(
-  apply(snps[categories],1,
-    function(snprow){
-      #print(snprow)
-      for (category in categories){
-        if (snprow[category]){
-          snprow[categories] = FALSE
-          snprow[category] = TRUE
-          return(snprow)
-        }
-      }
-      return(snprow)
-    }
-  )
-)
-
-# Bind cleaned results back to data frame
-snps[categories] = cleaned
-
-# If none of the categories are true, then the SNP must lie in another region
-snps['otherRegion']=!apply(snps[,categories],1,any)
-
-categories = append(categories,'otherRegion')
+# Add outside gene column
+snps['outsideGene']=!snps['inGene']
 
 # Make summary table
 regiondf = data.frame(region=categories)
@@ -75,7 +51,7 @@ regiondf['nsnps%']=(regiondf['nsnps']/nrow(snps))*100
 
 rownames(regiondf)=regiondf[,'region']
 
-write.table(regiondf, paste0(overlapdir,'../gencode_region_summary.csv'), sep=',', col.names=T, row.names=F, quote=F)
+write.table(regiondf, paste0(overlapdir,'../gencode_inoutgene_summary.csv'), sep=',', col.names=T, row.names=F, quote=F)
  
 # Make table of region counts
 # Make summary plot
