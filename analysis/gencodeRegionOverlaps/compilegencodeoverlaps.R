@@ -41,7 +41,7 @@ snps['nregions'] = rowSums(snps[,c(as.character(catdf$categories))])
 # Clean data by ordering columns and returning the first TRUE value you encounter in the list
 #categories = factor(categories,levels=c('intronsOnly','codingExonsOnly','3UTRexonsOnly','5UTRexonsOnly','80upstreamOnly'))
 #categories = c('intronsOnly','codingExonsOnly','3UTRexonsOnly','5UTRexonsOnly','80upstreamOnly')
-categories = c('intronsOnly','3UTRexonsOnly','5UTRexonsOnly','exonsOnly','80upstreamOnly')
+categories = c('intronsOnly','3UTRexonsOnly','5UTRexonsOnly','codingExonsOnly','80upstreamOnly')
 
 cleaned = t(
   apply(snps[categories],1,
