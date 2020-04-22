@@ -12,6 +12,7 @@ mkdir -r $datdir/plink_log
 
 # Prune study data by pruning sites in LD & also removing pre-computed high-LD areas
 plink --bfile  $datdir/$name \
+      --biallelic-only --maf 0.05 --mind 0.01 --geno 0.01 \ #Same QC as sQTL analysis
       --exclude range  $refdir/$highld \
       --indep-pairwise 50 5 0.2 \
       --out $datdir/$name
