@@ -1,18 +1,21 @@
-# Source: https://meyer-lab-cshl.github.io/plinkQC/articles/AncestryCheck.html
+# Based on vignette here: https://meyer-lab-cshl.github.io/plinkQC/articles/AncestryCheck.html
 ml plink
+ml python/3.7.3 # Used for py script to compare related individuals & generate list of relatives to drop
 
 datdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/studydata'
 name='ASD-EPI_Plates1-2'
-refdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/1kg_phase3'
+refdir='/sc/hydra/projects/pintod02c/1kg_phase3'
 refname='all_phase3'
 reference='1kg_phase3'
 highld='high-LD-regions-hg38-GRCh38.txt'
 
-mkdir -r $datdir/plink_log
+pyscrpath='/sc/arion/projects/EPIASD/splicingQTL/PCA'
+
+mkdir $datdir/plink_log
 
 # Prune study data by pruning sites in LD & also removing pre-computed high-LD areas
 plink --bfile  $datdir/$name \
-      --biallelic-only --maf 0.05 --mind 0.01 --geno 0.01 \ #Same QC as sQTL analysis
+      --biallelic-only --maf 0.05 --mind 0.01 --geno 0.01 \
       --exclude range  $refdir/$highld \
       --indep-pairwise 50 5 0.2 \
       --out $datdir/$name
@@ -64,6 +67,12 @@ plink --bfile $datdir/$refname.updateChr \
       --out $datdir/$refname.flipped
 mv $datdir/$refname.flipped.log $datdir/plink_log/$refname.flipped.log
 
+# Find related individuals in the reference and remove the one with lower genotyping rate
+plink --bfile $datdir/$refname.flipped --missing --allow-extra-chr --out  $datdir/$refname.flipped.missingStats
+plink --bfile $datdir/$refname.flipped --genome --allow-extra-chr --out $datdir/$refname.flipped.relatedness
+# Make list of people to drop (they'll be dropped in the next step when we remove mismatches)
+python3 $pyscrpath/makeRelatedExcludeList.py $datdir/$refname.flipped.missingStats.imiss $datdir/$refname.flipped.relatedness.genome
+
 # Remove mismatches
 # Any alleles that do not match after allele flipping, are identified and removed from the reference dataset.
 awk 'BEGIN {OFS="\t"} FNR==NR {a[$1$2$4]=$5$6; next} \
@@ -72,6 +81,7 @@ awk 'BEGIN {OFS="\t"} FNR==NR {a[$1$2$4]=$5$6; next} \
     $datdir/$refname.mismatch
 
 plink --bfile $datdir/$refname.flipped \
+      --remove $datdir/SamplesToExcludeForPCA.txt \
       --exclude $datdir/$refname.mismatch \
       --make-bed \
       --out $datdir/$refname.clean
