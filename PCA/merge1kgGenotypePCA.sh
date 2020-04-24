@@ -1,27 +1,31 @@
-# Based on vignette here: https://meyer-lab-cshl.github.io/plinkQC/articles/AncestryCheck.html
+# Based on vignette here: https://meyer-dfflab-cshl.github.io/plinkQC/articles/AncestryCheck.html
 ml plink
 ml python/3.7.3 # Used for py script to compare related individuals & generate list of relatives to drop
 
-datdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/studydata'
-name='ASD-EPI_Plates1-2'
+#datdir='/sc/hydra/projects/pintod02c/koorne_wd/GenomeStudio/Plates1-6/QC-files/'
+datdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/QC-files/'
+name='ASD-Epi_Plates1-6_gendercorrected.unrelated'
 refdir='/sc/hydra/projects/pintod02c/1kg_phase3'
 refname='all_phase3'
 reference='1kg_phase3'
 highld='high-LD-regions-hg38-GRCh38.txt'
+popfile='/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt'
 
 pyscrpath='/sc/arion/projects/EPIASD/splicingQTL/PCA'
+
 
 mkdir $datdir/plink_log
 
 # Prune study data by pruning sites in LD & also removing pre-computed high-LD areas
 plink --bfile  $datdir/$name \
-      --biallelic-only --maf 0.05 --mind 0.01 --geno 0.01 \
       --exclude range  $refdir/$highld \
       --indep-pairwise 50 5 0.2 \
       --out $datdir/$name
 mv  $datdir/$name.prune.log $datdir/plink_log/$name.prune
 
 plink --bfile  $datdir/$name \
+      --autosome \
+      --biallelic-only --maf 0.05 --mind 0.01 \
       --extract $datdir/$name.prune.in \
       --make-bed \
       --out $datdir/$name.pruned
@@ -30,6 +34,7 @@ mv  $datdir/$name.pruned.log $datdir/plink_log/$name.pruned
 # Filter reference data for the same SNP set as in study
 plink --bfile  $refdir/$refname \
       --allow-extra-chr \
+      --biallelic-only --maf 0.05 --mind 0.01 \
       --extract $datdir/$name.prune.in \
       --make-bed \
       --out $datdir/$refname.pruned
@@ -68,8 +73,8 @@ plink --bfile $datdir/$refname.updateChr \
 mv $datdir/$refname.flipped.log $datdir/plink_log/$refname.flipped.log
 
 # Find related individuals in the reference and remove the one with lower genotyping rate
-plink --bfile $datdir/$refname.flipped --missing --allow-extra-chr --out  $datdir/$refname.flipped.missingStats
-plink --bfile $datdir/$refname.flipped --genome --allow-extra-chr --out $datdir/$refname.flipped.relatedness
+plink --bfile $datdir/$refname.flipped --missing --out  $datdir/$refname.flipped.missingStats
+plink --bfile $datdir/$refname.flipped --genome --out $datdir/$refname.flipped.relatedness
 # Make list of people to drop (they'll be dropped in the next step when we remove mismatches)
 python3 $pyscrpath/makeRelatedExcludeList.py $datdir/$refname.flipped.missingStats.imiss $datdir/$refname.flipped.relatedness.genome
 
@@ -89,10 +94,12 @@ mv $datdir/$refname.clean.log $datdir/plink_log/$refname.clean.log
 
 # Merge study genotypes and reference data
 # The matching study and reference dataset can now be merged into a combined dataset with plink –bmerge. If all steps outlined above were conducted successfully, no mismatch errors should occur.
+# After merger filter genotyping rate down to 90%
 
 plink --bfile $datdir/$name.pruned  \
       --bmerge $datdir/$refname.clean.bed $datdir/$refname.clean.bim \
          $datdir/$refname.clean.fam  \
+      --geno 0.1 \
       --make-bed \
       --out $datdir/$name.merge.$refname
 mv $datdir/$name.merge.$refname.log $datdir/plink_log
@@ -102,5 +109,15 @@ mv $datdir/$name.merge.$refname.log $datdir/plink_log
 
 plink --bfile $datdir/$name.merge.$refname \
       --pca \
-      --out $datdir/$name.$reference
+      --genome \
+      --out $datdir/$name.$reference \
+      --within $popfile \
+      --pca-cluster-names AFR SAS EAS EUR AMR \
 mv $datdir/$name.$reference.log $datdir/plink_log
+
+plink --bfile $datdir/$name.merge.$refname \
+      --read-genome $datdir/$name.$reference.genome \
+      --cluster \
+      --ppc 1e-3 \
+      --mds-plot 2 \
+      --out $datdir/$name.$reference
