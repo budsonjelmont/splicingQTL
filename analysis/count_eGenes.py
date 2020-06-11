@@ -3,7 +3,7 @@ import sys
 
 overlapsfile = sys.argv[1] #'intron-gene_annotations.txt'
 annotatefqtloutput = sys.argv[2] #T/F whether to append sGene ENSG to fastQTL results data frame
-ensemblfile = '/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/biomart_ENSG_to_ENST.txt'
+ensemblfile = '/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/gencode_ENSG_to_ENST.txt'
 
 ol = pd.read_csv(overlapsfile, sep='\t', header=None)
 ensembl = pd.read_csv(ensemblfile, sep='\t')
@@ -36,5 +36,5 @@ fqtlout['enst'] = ol.groupby(3)['Transcript stable ID'].first()
 # ...And then use the transcript ID to get the gene ID
 fqtlout.set_index('enst', inplace=True, drop=False, append=False, verify_integrity=False)
 fqtlout['ensg'] = ensembl['Gene stable ID']
-
-
+# Write out the new file with the gene ID included
+fqtlout.to_csv(fqtloutfile[:-4]+'+ensg.csv', sep='\t', index=False, header=True)

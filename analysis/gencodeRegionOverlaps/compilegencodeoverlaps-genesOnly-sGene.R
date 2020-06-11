@@ -31,24 +31,32 @@ categories = unlist(lapply(files, getSuffix))
 
 # Initialize data frame that will hold category counts 
 catdf = data.frame(cbind(files,categories)) 
+rownames(catdf)=catdf$categories
 
 # Add columns to SNPs data frame summarizing genomic locations
 getOverlap = function(cats,snpdf){
   bedfile = cats['files']
+  category = as.character(cats['categories'][[1]])
   bed = read.table(bedfile, sep='\t',col.names=c('chr','start','end','snp_id','clust_id','strand','chr_gc','start_gc','end_gc','id_gc','score_gc','strand_gc','cdsstart_gc','cdsend_gc','rgb_gc','bcount_gc','bstart_gc','blen_gc','len_overlap'))
   bed$id_gc = do.call(rbind,strsplit(as.character(bed$id_gc),'\\.'))[,1]
   # Merge BEDTOOLS output with ENST->ENSG map to get gene IDs
   bed = merge(bed, ensembl, by.x='id_gc', by.y='Transcript.stable.ID', all.x=TRUE)
   m=merge(snpdf, bed[!duplicated(bed[,c('snp_id','Gene.stable.ID')]),c('snp_id','Gene.stable.ID','len_overlap')], by.x=c('snp_id','ensg'), by.y=c('snp_id','Gene.stable.ID'), all.x=T, suffixes = c('', '_bed'))
-  return(!is.na(m[,'len_overlap'])) 
+  m[category] = !is.na(m[,'len_overlap'])
+  return(m[,c('snp_id','tscrid',category)])
+  #return(!is.na(m[,'len_overlap'])) 
 }
 
 res = apply(catdf,1,getOverlap,snps)
-colnames(res) = catdf$categories
-rownames(res) = 1:nrow(res)
-
-# Merge
-snps = merge(snps, as.data.frame(res), by='row.names', all=TRUE)
+# Add new columns to SNP data frame
+snps=do.call(
+ cbind,lapply(names(res),
+  function(category){  
+    merge(snps,res[[category]], by.x=c('snp_id','tscrid'), by.y=c('snp_id','tscrid'))
+  }
+ )
+)
+snps = cbind(snps,newcols)
 
 # Change column names
 categories = c('inGene','outsideGene')
@@ -58,9 +66,13 @@ colnames(snps)[colnames(snps) %in% catdf$categories] = categories[1]
 # Add outside gene column
 snps['outsideGene']=!snps['inGene']
 
-# Now make summary table of sSNPs falling within their sGene only
+# Now make summary columns of sSNPs falling within their sGene only
 snps[is.na(snps['inGene']),'inGene']=FALSE
 snps[is.na(snps['outsideGene']),'outsideGene']=TRUE
+fnamesplit = unlist(strsplit(sigsqtlfile,'\\.'))
+write.table(snps, paste0(fnamesplit[1],'+sSNPloc.',fnamesplit[2]), sep='\t', col.names=T, row.names=F, quote=F)
+
+# Make summary table of sSNP locations
 regiondf = data.frame(region=categories)
 regiondf['nsnps']=unlist(lapply(categories,function(x){return(sum(snps[,x]))}))
 regiondf['nsnps%']=(regiondf['nsnps']/nrow(snps))*100
