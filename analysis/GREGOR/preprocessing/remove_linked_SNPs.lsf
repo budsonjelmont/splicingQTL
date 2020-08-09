@@ -1,0 +1,55 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkRemoveLinkedSNPs
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 1
+#BSUB -W 01:30
+#BSUB -R rusage[mem=130000]
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/remove_LD_SNPs_%J_output.txt
+
+# Given a list of sSNPs, extract these SNPs from the subset of EUR 1KG SNPs. Then, filter out the SNPs in high LD (r2 > 0.8), and return the remaining SNPs that can be used as input to GREGOR
+
+module load plink/1.90
+
+LDwindow=1500
+LDstep=150
+LDthresh=0.8
+
+inSNPsdir=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/
+inSNPsfile=uniqueLeadSNPuniquephenos-chrpos.txt
+
+tmpdir=/sc/arion/scratch/belmoj01/GREGOR/tmp/
+
+refdir=/sc/hydra/projects/pintod02c/1kg_phase3/
+refname=all_phase3
+popfile=/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt # File containing an assignment of individuals to populations
+
+# Make a scratch folder to do our dirty work in
+#rm -rf $tmpdir
+mkdir -p $tmpdir
+
+##################################################
+
+# Filter the populations file for the subset of EUR individuals
+if [ ! -f ${tmpdir}EUR1kg.txt ]; then
+  awk '{if($3=="EUR") print $0}' $popfile > ${tmpdir}EUR1kg.txt 
+else 
+  echo "${tmpdir}EUR1kg.txt already exists--no need to create"
+fi
+
+# Make 3 col BED file of coordinates 
+uniq ${inSNPsdir}${inSNPsfile} | gawk 'BEGIN{FS="\t"}; {match($1,"([0-9XYM]+):([0-9]+)", coords); print coords[1],coords[2],coords[2],coords[1]":"coords[2]}' > ${tmpdir}${inSNPsfile}.extract.in
+
+# Filter 1kg data by keeping only EUR subjects & by SNP coords to filter down to only QTL SNPs.Then, calculate LD & produce list of unlinked SNPs   
+plink --bfile ${refdir}$refname \
+      --allow-extra-chr \
+      --extract range ${tmpdir}${inSNPsfile}.extract.in \
+      --keep ${tmpdir}EUR1kg.txt \
+      --maf 0.05 --mind 0.01 --geno 0.1 \
+      --indep-pairwise ${LDwindow} ${LDstep} ${LDthresh}
+mv plink.prune.in ${inSNPsdir}uniqueLeadSNPuniquephenos-chrpos-LD${LDthresh}.txt_noChr
+sed 's/^/chr/g' ${inSNPsdir}uniqueLeadSNPuniquephenos-chrpos-LD${LDthresh}.txt_noChr > ${inSNPsdir}uniqueLeadSNPuniquephenos-chrpos-LD${LDthresh}.txt
+
+# Remove other stray plink files
+#rm plink*
