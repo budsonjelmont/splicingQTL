@@ -1,0 +1,77 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J plinkRemoveLinkedSNPs
+#BSUB -P acc_pintod02b
+#BSUB -q express
+#BSUB -n 1
+#BSUB -W 01:30
+#BSUB -R rusage[mem=130000]
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/remove_LD_SNPs_%J_output.txt
+
+# Preprocess 1KG reference to make a EUR-only reference containing only SNPs with no duplicate RSIDs/chr:pos that
+# can then be used to calculate LD & extract SNPs for GREGOR 
+
+module load plink/1.90
+
+LDwindow=1500
+LDstep=150
+LDthresh=0.8
+
+inSNPsdir=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/
+#inSNPsdir=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/Walker2018_data/
+inSNPsfile=uniqueLeadSNPuniquephenos-chrpos.txt
+
+tmpdir=/sc/arion/scratch/belmoj01/GREGOR/tmp/
+
+refdir=/sc/hydra/projects/pintod02c/1kg_phase3/
+refname=all_phase3
+popfile=/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt # File containing an assignment of individuals to populations
+
+# Make a scratch folder to do our dirty work in
+mkdir -p $tmpdir
+
+##################################################
+
+# Filter the populations file for the subset of EUR individuals
+if [ ! -f ${tmpdir}EUR1kg.txt ]; then
+  awk '{if($3=="EUR") print $0}' $popfile > ${tmpdir}EUR1kg.txt 
+else 
+  echo "${tmpdir}EUR1kg.txt already exists--no need to create"
+fi
+
+# Re-map RSIDs -> chr:pos
+awk 'BEGIN{OFS="\t"};{print $2, $1":"$4}' ${refdir}$refname.bim > ${tmpdir}rsid2chrpos.map.dup
+
+# Make list of duplicated RSIDs to remove from 1kg
+cat ${tmpdir}rsid2chrpos.map.dup | cut -f1 | sort | uniq -d > ${tmpdir}1kgrsids.dup
+# Make list of duplicated chr:pos to remove from 1kg
+cat ${tmpdir}rsid2chrpos.map.dup | cut -f2 | sort | uniq -d > ${tmpdir}1kgchrpos.dup
+
+cat ${tmpdir}1kgrsids.dup ${tmpdir}1kgchrpos.dup > ${tmpdir}allexcludes.dup
+
+# Remove dupes from RSID -> chr:pos map
+grep -vwFf ${tmpdir}allexcludes.dup ${tmpdir}rsid2chrpos.map.dup > ${tmpdir}rsid2chrpos.map
+
+# If an RSID-deduped, EUR reference doesn't already exist, make one
+if [ ! -f ${tmpdir}$refname.EUR.dedupe.bim ]; then
+  plink --bfile ${refdir}$refname \
+        --allow-extra-chr \
+        --exclude ${tmpdir}1kgrsids.dup \
+        --list-duplicate-vars ids-only suppress-first \
+        --keep ${tmpdir}EUR1kg.txt \
+        --maf 0.05 --mind 0.01 --geno 0.1 \
+        --make-bed \
+        --out ${tmpdir}$refname.EUR
+
+ # Drop duplicate chr:pos as identified in last step 
+  plink --bfile ${tmpdir}$refname.EUR \
+        --allow-extra-chr \
+        --exclude ${tmpdir}$refname.EUR.dupvar \
+        --make-bed \
+        --out ${tmpdir}$refname.EUR.dedupe
+else 
+  echo "${tmpdir}EUR1kg.txt already exists--no need to create"
+fi
+
+# Remove stray plink files
+rm plink*
