@@ -65,8 +65,8 @@ outpath='/sc/arion/projects/EPIASD/splicingQTL/PCA/'
 setwd(outpath)
 options(scipen=100, digits=3)
 
-basepath='/sc/arion/projects/EPIASD/splicingQTL/PCA/studydata/' # This is the path where the PCA output lives
-basefile='ASD-EPI_Plates1-2.1kg_phase3' # This is the base name of the .eigenval & .eigenvec files
+basepath='/sc/arion/scratch/belmoj01/splicingQTL/' # This is the path where the PCA output lives
+basefile='Capstone4.sel.idsync.2allele.1kg_phase3' # This is the base name of the .eigenval & .eigenvec files
 meta1kgfile='/sc/arion/projects/EPIASD/splicingQTL/PCA/1kg_phase3_samplesuperpopinferreddata.txt'
 
 # Plot params
