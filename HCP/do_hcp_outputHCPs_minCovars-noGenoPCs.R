@@ -1,13 +1,15 @@
+args = commandArgs(trailingOnly=TRUE)
+
 .libPaths( c( .libPaths(), "/hpc/users/belmoj01/.Rlib") )
 library(Rhcpp)
 
 # Read input files
 #countsfile = '/sc/hydra/scratch/belmoj01/splicingQTL/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.05_perind.counts.idsync.deduped.gz.qqnorm_AllCombined'
-countsfile = '/sc/hydra/scratch/belmoj01/splicingQTL/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.05_perind.counts.idsync.deduped.gz.phen_AllCombined'
+countsfile = args[1] #'/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/pheno_wasp/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_allCombined'
 #countsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_input/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.gz.qqnorm.AllCombined'
 #covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar/leafcutter-input_covar.20genoPCs.idsync.10splicingPCs.deduped.minCovars.txt'
-covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar_wasp/leafcutter-input_covar.20genoPCs.idsync.10splicingPCs.deduped.minCovars.txt'
-numhcps = 40
+covarsfile = args[2] # '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/covar_wasp/leafcutter-input_covar_WASP.20genoPCs.idsync.deduped.minCovars+seqPC9+20genoPCs.txt'
+numhcps = as.numeric(args[3]) #5
 
 counts = read.table(countsfile, header=TRUE, comment.char='@', check.names=FALSE, stringsAsFactors=FALSE)
 # If concatenated file contains multiple header rows due to concatenation, drop all them
@@ -55,8 +57,8 @@ lambda3 = 1
 
 iter = 100
 
-##read expected result
-res = hcp(Z, Y, k, lambda1, lambda2, lambda3, iter, fast=FALSE, stand=TRUE, log=TRUE)
+# Read expected result
+res = hcp(Z, Y, k, lambda1, lambda2, lambda3, iter, fast=FALSE, stand=TRUE, log=FALSE)
 
 summary(res)
 hcps = data.frame(t(res$W))

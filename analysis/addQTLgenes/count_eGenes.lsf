@@ -8,24 +8,29 @@
 #BSUB -R rusage[mem=12000]
 #BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/annotate_eGenes_output_%J.txt
 
-#fqtlBedDir='/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/pheno_wasp/'
-#fqtlBedFile=Phenotype.bed
-fqtlBedDir=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/
-fqtlBedFile=sqtlphenos_unique.bed
-fqtlResFile=significant_sqtl.csv
+fqtlBedDir=$1
+fqtlBedFile=$2
 
-annotBedDir=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/
-#annotBedFile='gencode.v19.annotation.clean.bed'
+idmapfile=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/gencode_ENSG_to_ENST.txt
+
+fqtlResFile=$3
+
+feattype=$4
+
+annotBedDir=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/gencodeV19/newBed_0904020/
 annotBedFile=gencode.v19.annotation.bed
 
 outFile=intron-gene_annotations.txt
+
+pydir=/sc/arion/projects/EPIASD/splicingQTL/analysis/addQTLgenes
 
 ml bedtools
 ml python/3.7.3
 
 # -wo flag writes matching rows from both files & all columns
 # -wb flag writes ONLY the rows that overlap from the ENSEMBL genes .BED file
-bedtools intersect -wo -a ${fqtlBedDir}${fqtlBedFile} -b ${annotBedDir}${annotBedFile} > ${fqtlBedDir}${outFile}
+bedtools intersect -wo -a $fqtlBedDir$fqtlBedFile -b $annotBedDir$annotBedFile > $fqtlBedDir$outFile
 
 # Read the output file & report the number of unique gene IDs
-python3 count_eGenes.py ${fqtlBedDir}${outFile} True ${fqtlBedDir}${fqtlResFile}
+echo "python3 $pydir/count_eGenes.py $fqtlBedDir$outFile True $idmapfile $fqtlBedDir$fqtlResFile $feattype"
+python3 $pydir/count_eGenes.py $fqtlBedDir$outFile True $idmapfile $fqtlBedDir$fqtlResFile $feattype
