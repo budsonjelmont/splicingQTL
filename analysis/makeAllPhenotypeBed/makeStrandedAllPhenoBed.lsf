@@ -1,0 +1,13 @@
+#BUB -J makeQTLtoolsBed
+#BSUB -P acc_pintod02b
+#BSUB -q express
+##BSUB -m bashia02
+##BSUB -q private
+#BSUB -n 1
+#BSUB -W 1:00
+#BSUB -R rusage[mem=120000]
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/makeQTLtoolsPhenoBed_%J_output.txt
+
+ml python/3.7.3
+
+python3 make_stranded_allphenotypes_bed.py 
