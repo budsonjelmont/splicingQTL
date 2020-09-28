@@ -3,29 +3,35 @@ ml plink
 ml python/3.7.3 # Used for py script to compare related individuals & generate list of relatives to drop
 
 #datdir='/sc/hydra/projects/pintod02c/koorne_wd/GenomeStudio/Plates1-6/QC-files/'
-datdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/QC-files/'
-name='ASD-Epi_Plates1-6_gendercorrected.unrelated'
-refdir='/sc/hydra/projects/pintod02c/1kg_phase3'
-refname='all_phase3'
-reference='1kg_phase3'
-highld='high-LD-regions-hg38-GRCh38.txt'
-popfile='/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt'
+#datdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/QC-files/'
+#name='ASD-Epi_Plates1-6_gendercorrected.unrelated'
+datdir=/sc/arion/scratch/belmoj01/splicingQTL/
+name=Capstone4.sel.idsync.2allele
+refdir=/sc/arion/scratch/belmoj01/QTL_VCF/
+refname=all_phase3.dedupeByPos_bestMAF
+reference=1kg_phase3
+highld=/sc/hydra/projects/pintod02c/reference-databases/high_LD_regions/high_ld_and_autsomal_regions_hg19.txt
+popfile=/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt
 
-pyscrpath='/sc/arion/projects/EPIASD/splicingQTL/PCA'
+# QC parameters
+maf=0.01
+mind=0.05
+geno=0.05
 
+pyscrpath=/sc/arion/projects/EPIASD/splicingQTL/PCA
 
 mkdir $datdir/plink_log
 
 # Prune study data by pruning sites in LD & also removing pre-computed high-LD areas
 plink --bfile  $datdir/$name \
-      --exclude range  $refdir/$highld \
+      --exclude range $highld \
       --indep-pairwise 50 5 0.2 \
       --out $datdir/$name
 mv  $datdir/$name.prune.log $datdir/plink_log/$name.prune
 
 plink --bfile  $datdir/$name \
       --autosome \
-      --biallelic-only --maf 0.05 --mind 0.01 \
+      --biallelic-only --maf $maf --mind $mind \
       --extract $datdir/$name.prune.in \
       --make-bed \
       --out $datdir/$name.pruned
@@ -34,7 +40,7 @@ mv  $datdir/$name.pruned.log $datdir/plink_log/$name.pruned
 # Filter reference data for the same SNP set as in study
 plink --bfile  $refdir/$refname \
       --allow-extra-chr \
-      --biallelic-only --maf 0.05 --mind 0.01 \
+      --biallelic-only --maf $maf --mind $mind \
       --extract $datdir/$name.prune.in \
       --make-bed \
       --out $datdir/$refname.pruned
@@ -99,7 +105,7 @@ mv $datdir/$refname.clean.log $datdir/plink_log/$refname.clean.log
 plink --bfile $datdir/$name.pruned  \
       --bmerge $datdir/$refname.clean.bed $datdir/$refname.clean.bim \
          $datdir/$refname.clean.fam  \
-      --geno 0.1 \
+      --geno $geno \
       --make-bed \
       --out $datdir/$name.merge.$refname
 mv $datdir/$name.merge.$refname.log $datdir/plink_log
