@@ -37,11 +37,12 @@ multiplot = function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 ggbiplot = function(eigenvec,x,y,savepath){
   pcx = paste0('PC',as.character(x))
   pcy = paste0('PC',as.character(y))
-  g = ggplot(eigenvec,aes_string(x=pcx,y=pcy,color='ancestry')) +
-  geom_point(alpha = 0.75, shape = 16, size=2.5) +
+  g = ggplot(eigenvec,aes_string(x=pcx,y=pcy,color='ancestry',fill='ancestry')) +
+  geom_point(alpha = 0.25, shape = 16, size=2.5) +
   xlab(pcx) +
   ylab(pcy) +
   scale_color_manual(values=colscale,name='Ancestry') +
+  scale_fill_manual(values=colscale,name='Ancestry') +
   theme(
     title = element_text(color='black',size=18),
     panel.grid.major = element_blank(),
@@ -55,8 +56,30 @@ ggbiplot = function(eigenvec,x,y,savepath){
     plot.margin=unit(c(t=15,r=17,b=17,l=17),'pt'),
     panel.border = element_rect(colour = "black", fill=NA, size=2)
   )
-  ggsave(paste(savepath,'ancestryPCA_',pcx,'vs',pcy,'.png',sep=''), width=pwidth, plot = g)
+  ggsave(paste0(savepath,'ancestryPCA_',pcx,'vs',pcy,'.png'), width=pwidth, plot = g)
+  return(g)
 } 
+
+est_ancestry = function(eigenvec,g,x,y,conflevel,savepath){
+  pcx = paste0('PC',as.character(x))
+  pcy = paste0('PC',as.character(y))
+
+  for (z in unique(eigenvec['ancestry'][eigenvec['ancestry']!='This study'])){
+     #dat = cbind(eigenvec[,1:20],replace(eigenvec['ancestry'],eigenvec['ancestry']!=z,NA))
+     dat = eigenvec[which(eigenvec['ancestry']==z),]
+     # Add ellipse to plot to capture region containing x proportion of data points 
+     g = g + stat_ellipse(data=dat,method='t',alpha=0.55,level=conflevel,na.rm=T)
+     # Extract plot components
+     build = ggplot_build(g)$data
+     points = build[[1]]
+     ell = build[[length(build)]]
+     # Find which points are inside the ellipse, and add this to the data
+     eigenvec[,paste0('est_',z)]=as.logical(point.in.polygon(points$x, points$y, ell$x, ell$y))
+   } 
+  #) 
+  ggsave(paste0(savepath,'ancestryPCAwithEllipse_',pcx,'vs',pcy,'.png'), width=pwidth, plot = g)
+  return(eigenvec) 
+}
 
 # Biplots of genotype PCA results
 library(reshape2)
@@ -68,6 +91,9 @@ options(scipen=100, digits=3)
 basepath='/sc/arion/scratch/belmoj01/splicingQTL/' # This is the path where the PCA output lives
 basefile='Capstone4.sel.idsync.2allele.1kg_phase3' # This is the base name of the .eigenval & .eigenvec files
 meta1kgfile='/sc/arion/projects/EPIASD/splicingQTL/PCA/1kg_phase3_samplesuperpopinferreddata.txt'
+#estimate_ancestry=TRUE # Should an ancestry estimation be returned? This will also add ancestry ellipses to the plots written by ggbiplot()
+
+conflevel=0.95 # Confidence level to use when drawing ellipse to estimate sample ancestry
 
 # Plot params
 pwidth = 13
@@ -76,7 +102,7 @@ pwidth = 13
 eigenvec = data.frame(read.table(paste0(basepath,basefile,'.eigenvec'), header=FALSE, skip=0, sep=" "))
 rownames(eigenvec) = eigenvec[,2]
 eigenvec = eigenvec[,3:ncol(eigenvec)]
-colnames(eigenvec) = paste('PC', c(1:20), sep="")
+colnames(eigenvec) = paste0('PC', c(1:20))
 
 # read in the 1kg metadata & read population from 3rd column (col name varies between metadata files I prepared)
 ped = data.frame(read.table(meta1kgfile, header=TRUE, skip=0, sep="\t"))
@@ -114,6 +140,7 @@ legend("topleft", bty="n", cex=1.5, title="", c("African","Hispanic","East Asian
 
 # ggplot it
 library(ggplot2)
+library(sp) # Used to extract plot parameters when reading which points are inside ellipse
 
 npcs = 4 # n PCs to visualize. All pairs 1:n will be plotted
 PCs = seq(1,4,1)
@@ -121,7 +148,26 @@ PCs = seq(1,4,1)
 lapply(PCs,function(x){
   lapply(PCs, function(y,x){
     if(x!=y){
-      ggbiplot(eigenvec,x,y,outpath)
+      g=ggbiplot(eigenvec,x,y,outpath)
+      if(x==2 & y==1){
+        annot_eigenvec=est_ancestry(eigenvec,g,x,y,conflevel,outpath)
+        write.table(annot_eigenvec,paste0(outpath,basefile,'.eigenvec_ancestry_est'),sep='\t',quote=F)
+      }
     }
   },x)
+})
+
+
+est_cols = grep('^est_[.]*', colnames(annot_eigenvec), value = T, perl=T)
+anc = lapply(est_cols,function(x){
+  annot_x = annot_eigenvec[which(annot_eigenvec[,x]),]
+  tryCatch(
+    {
+      annot_x[,'est'] = gsub('est_','',x,perl=T)
+      return(annot_x)
+    },error = function(e) {
+      return(data.frame(colnames=colnames(annot_eigenvec))) 
+    }
+  )
+  #annot_eigenvec[x]=replace(annot_eigenvec[x],T,gsub('est_','',x,perl=T))
 })
