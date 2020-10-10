@@ -19,12 +19,19 @@ allqtlsbedfile = args.allqtlsbedfile[0]
 statsfile = args.statsfile[0]
 comparison = args.comparison[0]
 
-overlapbed = pd.read_csv(overlapbedfile, sep='\t', header=None)
 backgroundbed = pd.read_csv(backgroundbedfile, sep='\t', header=None)
 allqtlsbed = pd.read_csv(allqtlsbedfile, sep='\t', header=None)
 stats = pd.read_csv(statsfile, sep='\t')
 
 stats.set_index('comparison',inplace=True,verify_integrity=True)
+
+try:
+  overlapbed = pd.read_csv(overlapbedfile, sep='\t', header=None)
+except pd.errors.EmptyDataError:
+  print('No overlaps reported in ' + overlapbedfile)
+  stats.loc[comparison] = 0 
+  stats.to_csv(statsfile, sep='\t')
+  quit() 
 
 def get_map_ids(df,idcol):
   return df[idcol].str.split('|',expand=True)
