@@ -81,6 +81,6 @@ cut -d$'\t' -f2 $tmpdir${refname}.idmap.deduped > $tmpdir${refname}.idmap.dedupe
 plink --bfile $tmpdir$uqidname \
       --allow-extra-chr \
       --extract $tmpdir${refname}.idmap.deduped.extract.in \
-      --update-name $tmpdir${refname}.idmap.deduped \ 
+      --update-name $tmpdir${refname}.idmap.deduped \
       --make-bed \
       --out ${tmpdir}${outname}
