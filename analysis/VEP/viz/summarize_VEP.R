@@ -158,15 +158,28 @@ testEnrichment = function(dat,cat1,cat2,comparisontag,lohicolor,bootstrap,bs_snp
     if(bootstrap){ #boostrap OR confidence interval by testing observed proportion of QTL SNPs against x bootstrapped replicates
       bootstrapped = boot(data=bs_snps, statistic=get_OR, R=1000, category=x, dataname=cat1, observed=comp, stype='i')
       # Get 95% confidence interval. Options: c("norm","basic", "stud", "perc", "bca"). Explained here: https://www.geeksforgeeks.org/bootstrap-confidence-interval-with-r-programming/
-      pdf(paste0(cat1,'_',x,'_bootstraps.pdf'))
-      plot(bootstrapped)
-      dev.off()
-      ci = boot.ci(bootstrapped, type='norm')
-      test$conf.int[1] = ci$normal[2]
-      test$conf.int[2] = ci$normal[3]
-      # For CI type 'basic':
-      #test$conf.int[1] = ci$basic[4]
-      #test$conf.int[2] = ci$basic[5]
+      tryCatch(
+        {
+          ci = boot.ci(bootstrapped, type='norm')
+          pdf(paste0(cat1,'_',x,'_bootstraps.pdf'))
+          plot(bootstrapped)
+          dev.off()
+          ci = boot.ci(bootstrapped, type='norm')
+          test$conf.int[1] = ci$normal[2]
+          test$conf.int[2] = ci$normal[3]
+          # For CI type 'basic':
+          #test$conf.int[1] = ci$basic[4]
+          #test$conf.int[2] = ci$basic[5]
+        }, 
+        # Handle errors by assigning NA confidence intervals
+        error = function(err) { 
+          message(paste0('Error thrown bootstrapping CI for category ',x,' in dataset ',cat1,'. Error is below:'))
+          message(err)
+          test$conf.int[1] = NA 
+          test$conf.int[2] = NA 
+          return(NA)
+        }
+       )
     }
     return(data.frame(annotation=x,pval=test$p.value,OR=test$estimate,confintlow=test$conf.int[1],confinthigh=test$conf.int[2]))
   },bootstrap
@@ -239,8 +252,11 @@ if(annot_set=='original'){
   enr.df$annotation = ordered(enr.df$annotation, levels = c('intergenic','upstream_gene','exonic','intron','downstream_gene','other'))
 }
 
+# Drop rows for 'other' category
+enr.df = enr.df[enr.df$annotation!='other',]
+
 # Plot params
-yaxlim=12
+yaxlim=6
 
 p=ggplot(data = enr.df, aes_string(fill = 'dataset', x = 'annotation', y = 'OR'), width = 0.6) +
   geom_bar(colour='black', stat = 'identity', position='dodge', width=0.7) +
