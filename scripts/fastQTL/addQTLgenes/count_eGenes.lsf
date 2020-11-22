@@ -1,0 +1,36 @@
+#!/bin/bash
+# To run: bsub [options] < this_scripts_name
+#BSUB -J annotate_egenes
+#BSUB -P acc_pintod02b
+#BSUB -q premium
+#BSUB -n 1
+#BSUB -W 0:10
+#BSUB -R rusage[mem=12000]
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/annotate_eGenes_output_%J.txt
+
+fqtlbeddir=$1
+fqtlbedfile=$2
+
+idmapfile=/sc/arion/projects/EPIASD/splicingQTL/ext_data/other/gencodeV19/gencode_ENSG_to_ENST.txt
+
+fqtlresfile=$3
+
+feattype=$4
+
+annotbeddir=/sc/arion/projects/EPIASD/splicingQTL/ext_data/other/gencodeV19/newBed_0904020/
+annotbedfile=gencode.v19.annotation.bed
+
+outfile=intron-gene_annotations.txt
+
+pydir=/sc/arion/projects/EPIASD/splicingQTL/scripts/fastQTL/addQTLgenes
+
+ml bedtools
+ml python/3.7.3
+
+# -wo flag writes matching rows from both files & all columns
+# -wb flag writes ONLY the rows that overlap from the ENSEMBL genes .BED file
+bedtools intersect -wo -f 1.0 -a $fqtlbeddir$fqtlbedfile -b $annotbeddir$annotbedfile > $fqtlbeddir$outfile
+
+# Read the output file & report the number of unique gene IDs
+echo "python3 $pydir/count_eGenes.py $fqtlbeddir$outfile True $idmapfile $fqtlbeddir$fqtlresfile $feattype"
+python3 $pydir/count_eGenes.py $fqtlbeddir$outfile True $idmapfile $fqtlbeddir$fqtlresfile $feattype

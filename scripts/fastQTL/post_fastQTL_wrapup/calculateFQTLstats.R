@@ -14,7 +14,8 @@ plot(d$ppval, d$bpval, xlab='Direct method', ylab='Beta approximation', main='Ch
 abline(0, 1, col='red')
 dev.off()
 
-d$qval = qvalue(d$bpval)$qvalues
+#d$qval = qvalue(d$bpval)$qvalues #Storey
+d$qval = p.adjust(d$bpval, method='fdr') #Benjamini-Hochberg 
 
 d[,c('chr','start','end','clust')]= do.call(rbind,strsplit(d$pid,':'))
 
