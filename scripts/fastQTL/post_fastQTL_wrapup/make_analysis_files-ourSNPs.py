@@ -9,8 +9,9 @@ resdir = sys.argv[1]
 resfile = 'chrAll_combined+qval'
 rescols = ['pid', 'nvar', 'shape1', 'shape2', 'dummy', 'sid', 'dist', 'npval', 'slope', 'ppval', 'bpval','qval']
 
-hg38bedfile = sys.argv[2] # e.g. '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/4genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_50HCPs/hg38_liftover/allSNPS_unique_hg38.bed'
-frqfile = sys.argv[3] # e.g. '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/geno_wasp/Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.frq'
+hg38bedfile = sys.argv[2] # e.g. '/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/hg38_liftover/Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.hg38.bed'
+frqfile = sys.argv[3] # e.g. '/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.frq'
+allsnpsfile = sys.argv[4] # e.g. '/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.frq'
 
 try:
   hg38bed=pd.read_csv(hg38bedfile,sep='\t',header=None)
@@ -24,8 +25,8 @@ try:
 except FileNotFoundError:
   addFrq=False
 
-allphenodir = '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/pheno_wasp/'
-allphenofile = 'Phenotype.bed'
+allphenodir = '/sc/arion/projects/EPIASD/splicingQTL/output/pheno_wasp/'
+allphenofile = 'Phenotype.bed_noChr'
 
 allres = pd.read_csv(resdir + resfile, sep='\t')
 allphenos = pd.read_csv(allphenodir + allphenofile, sep='\t', header=None)
@@ -87,14 +88,19 @@ joined.loc[sid_notna & qval05].astype(str).drop_duplicates('pid').drop_duplicate
 # Export standardized output file:
 joined['pid_chr']=joined[0]
 
-if liftover:
-  outfilename='qtls+hg38.txt'
-  standardizedcoldict={'sid':'sid',0:'sid_chr','sid_start':'sid_start','sid_end':'sid_end','dist':'dist','pid':'pid','pid_chr':'pid_chr',1:'pid_start',2:'pid_end','phenoId':'phenoId','slope':'slope','pval':'ppval','qval':'qval','sid_hg38':'sid_hg38','sid_chr_hg38':'sid_chr_hg38','sid_start_hg38':'sid_start_hg38','sid_end_hg38':'sid_end_hg38'}
-else:
-  outfilename='qtls.txt'
-  standardizedcoldict={'sid':'sid',0:'sid_chr','sid_start':'sid_start','sid_end':'sid_end','dist':'dist','pid':'pid','pid_chr':'pid_chr',1:'pid_start',2:'pid_end','phenoId':'phenoId','slope':'slope','pval':'ppval','qval':'qval'}
+# Column renamer
+standardizedcoldict={'sid':'sid',0:'sid_chr','sid_start':'sid_start','sid_end':'sid_end','dist':'dist','pid':'pid','pid_chr':'pid_chr',1:'pid_start',2:'pid_end','phenoId':'phenoId','slope':'slope','bpval':'bpval','qval':'qval'} 
+outfilename='qtls.txt'
+
 joined.rename(columns=standardizedcoldict,inplace=True)
 joined.loc[sid_notna & qval05].to_csv(resdir + outfilename,columns=standardizedcoldict.values(),sep='\t',index=None)
+
+if liftover: 
+  hg38outfilename='qtls+hg38.txt'
+  hg38cols={'sid_hg38':'sid_hg38','sid_chr_hg38':'sid_chr_hg38','sid_start_hg38':'sid_start_hg38','sid_end_hg38':'sid_end_hg38'}
+  standardizedcoldict.update(hg38cols)
+  joined.rename(columns=standardizedcoldict,inplace=True)
+  joined.loc[sid_notna & qval05].to_csv(resdir + hg38outfilename,columns=standardizedcoldict.values(),sep='\t',index=None)
 
 # Make moloc input file
 # Calculate SE from beta & pvalue. See https://github.com/stephenslab/gtexresults/commit/d1a14f3792844b121d0142c1d5c438ed91dfb258

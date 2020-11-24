@@ -2,17 +2,23 @@ library(qvalue)
 
 args = commandArgs(trailingOnly=TRUE)
 
-resdir = args[1]
-#resdir = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output/20genoPCs_nogeno/deduped_mincovars_40HCPs/'
+resdir = args[1] # e.g. '/sc/arion/projects/EPIASD/splicingQTL/output/fqtl_output_wasp_nominal_normal/minCovars+seqPC9/20genoPCs/55HCPs/'
+#isnominal = args[2] # e.g. TRUE if fastQTL was run without the --permute flag (not used currently, count columns to determine if results are nominal or permuted)
 infile = 'chrAll_combined'
 
 d = read.table(paste(resdir,infile,sep=''), header=F, stringsAsFactors=F)
 
-colnames(d) = c('pid', 'nvar', 'shape1', 'shape2', 'dummy', 'sid', 'dist', 'npval','slope', 'ppval', 'bpval')
-png(paste(resdir,'nominal pvalue vs Beta-approximated pvalue.png',sep=''))
-plot(d$ppval, d$bpval, xlab='Direct method', ylab='Beta approximation', main='Check plot')
-abline(0, 1, col='red')
-dev.off()
+if(ncol(d)==5){ # Results are from nominal pass
+  colnames(d) = c('pid', 'sid', 'dist', 'bpval','slope')
+} else if (ncol(d)==11){ # Results are from permutation pass
+  colnames(d) = c('pid', 'nvar', 'shape1', 'shape2', 'dummy', 'sid', 'dist', 'npval','slope', 'ppval', 'bpval')
+  png(paste(resdir,'nominal pvalue vs Beta-approximated pvalue.png',sep=''))
+  plot(d$ppval, d$bpval, xlab='Direct method', ylab='Beta approximation', main='Check plot')
+  abline(0, 1, col='red')
+  dev.off()
+} else {
+  print('ERROR: unexpected number of columns in fastQTL output (should be 5 or 11)')
+}
 
 #d$qval = qvalue(d$bpval)$qvalues #Storey
 d$qval = p.adjust(d$bpval, method='fdr') #Benjamini-Hochberg 
