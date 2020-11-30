@@ -1,9 +1,17 @@
+library(argparse)
 library(data.table)
 library(ggplot2)
 
-basepath='/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/'
-#basepath='/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/'
-res = fread(paste0(basepath,'HCP_titration_summary_seqPC9.tsv'))
+parser = ArgumentParser(description='Read the HCP_titration_summary.tsv file created by make_stats_table.py & plot yields from the HCP titrations.')
+
+parser$add_argument('--basepath', metavar='basepath', type='character', nargs='?', help='Dir containing the HCP_titration_summary.tsv file')
+
+args = parser$parse_args()
+#args = parser$parse_args('/sc/arion/projects/EPIASD/splicingQTL/output/fqtl_output_wasp_nominal_normal/minCovars+seqPC9/4genoPCs/')
+
+basepath=args$basepath
+
+res = fread(paste0(basepath,'HCP_titration_summary.tsv'))
 
 gg_linechart = function(df,xcol,xname,ycol,yname,title){
  max_hc = max(df[,..xcol])
@@ -24,6 +32,7 @@ gg_linechart = function(df,xcol,xname,ycol,yname,title){
     )
  plot(p)
  ggsave(paste0(basepath,'sQTL_titration-',xcol,'-vs-',ycol,'.png'),p)
+ ggsave(paste0(basepath,'sQTL_titration-',xcol,'-vs-',ycol,'.pdf'),p)
 }
 
 gg_linechart(res,'n_hcps','Hidden covariates','n_sgenes','Genes containing a QTL','Genes containing a QTL')
