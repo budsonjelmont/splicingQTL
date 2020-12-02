@@ -2,30 +2,30 @@
 ml plink
 ml python/3.7.3 # Used for py script to compare related individuals & generate list of relatives to drop
 
-#datdir='/sc/hydra/projects/pintod02c/koorne_wd/GenomeStudio/Plates1-6/QC-files/'
-#datdir='/sc/arion/projects/EPIASD/splicingQTL/PCA/QC-files/'
-#name='ASD-Epi_Plates1-6_gendercorrected.unrelated'
-datdir=/sc/arion/scratch/belmoj01/splicingQTL/
-name=Capstone4.sel.idsync.2allele
-refdir=/sc/arion/scratch/belmoj01/QTL_VCF/
-refname=all_phase3.dedupeByPos_bestMAF
-reference=1kg_phase3
+datdir=/sc/arion/scratch/belmoj01/pca_script_test_new_with_within
+name=ASD-Epi_Plates1-6_gendercorrected.unrelated
+refdir=/sc/arion/projects/pintod02c/1kg_phase3/
+refname=all_phase3
+reference=1kg_phase3_nodedupe
 highld=/sc/hydra/projects/pintod02c/reference-databases/high_LD_regions/high_ld_and_autsomal_regions_hg19.txt
 popfile=/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt
 
 # QC parameters
-maf=0.01
+ldwindow=50
+ldstep=5
+ldr2=0.2
+maf=0.05
 mind=0.05
 geno=0.05
 
-pyscrpath=/sc/arion/projects/EPIASD/splicingQTL/PCA
+pyscrpath=/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/PCA
 
-mkdir $datdir/plink_log
+mkdir -p $datdir/plink_log
 
 # Prune study data by pruning sites in LD & also removing pre-computed high-LD areas
 plink --bfile  $datdir/$name \
       --exclude range $highld \
-      --indep-pairwise 50 5 0.2 \
+      --indep-pairwise $ldwindow $ldstep $ldr2 \
       --out $datdir/$name
 mv  $datdir/$name.prune.log $datdir/plink_log/$name.prune
 
@@ -96,11 +96,11 @@ plink --bfile $datdir/$refname.flipped \
       --exclude $datdir/$refname.mismatch \
       --make-bed \
       --out $datdir/$refname.clean
-mv $datdir/$refname.clean.log $datdir/plink_log/$refname.clean.log
+mv $datdir/$refname.clean.log $datdir/plink_log/
 
 # Merge study genotypes and reference data
 # The matching study and reference dataset can now be merged into a combined dataset with plink –bmerge. If all steps outlined above were conducted successfully, no mismatch errors should occur.
-# After merger filter genotyping rate down to 90%
+# After merger filter genotyping rate again 
 
 plink --bfile $datdir/$name.pruned  \
       --bmerge $datdir/$refname.clean.bed $datdir/$refname.clean.bim \
@@ -108,7 +108,7 @@ plink --bfile $datdir/$name.pruned  \
       --geno $geno \
       --make-bed \
       --out $datdir/$name.merge.$refname
-mv $datdir/$name.merge.$refname.log $datdir/plink_log
+mv $datdir/$name.merge.$refname.log $datdir/plink_log/
 
 # PCA on the merged data
 # We can now run principal component analysis on the combined dataset using plink –pca which returns a .eigenvec file with the family and individual ID in columns 1 and 2, followed by the first 20 principal components.
@@ -116,9 +116,7 @@ mv $datdir/$name.merge.$refname.log $datdir/plink_log
 plink --bfile $datdir/$name.merge.$refname \
       --pca \
       --genome \
-      --out $datdir/$name.$reference \
-      --within $popfile \
-      --pca-cluster-names AFR SAS EAS EUR AMR \
+      --out $datdir/$name.$reference #--within $popfile --pca-cluster-names AFR SAS EAS EUR AMR
 mv $datdir/$name.$reference.log $datdir/plink_log
 
 plink --bfile $datdir/$name.merge.$refname \
