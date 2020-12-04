@@ -5,7 +5,7 @@ import pandas as pd
 indir=sys.argv[1]
 infile='qtls+pid_ensg+sid_ensg.txt'
 
-res=pd.read_csv(indir+infile,sep='\t')
+res=pd.read_csv(indir+'/'+infile,sep='\t')
 
 print("Unique genes (pid):" + str(res['pid_ensg'].nunique()))
 print("Unique genes (sid):" + str(res['sid_ensg'].nunique()))

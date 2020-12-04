@@ -11,7 +11,7 @@ args = parser$parse_args()
 
 basepath=args$basepath
 
-res = fread(paste0(basepath,'HCP_titration_summary.tsv'))
+res = fread(paste0(basepath,'/HCP_titration_summary.tsv'))
 
 gg_linechart = function(df,xcol,xname,ycol,yname,title){
  max_hc = max(df[,..xcol])
@@ -31,12 +31,12 @@ gg_linechart = function(df,xcol,xname,ycol,yname,title){
       axis.title.y = element_text(size=16,color='black')
     )
  plot(p)
- ggsave(paste0(basepath,'sQTL_titration-',xcol,'-vs-',ycol,'.png'),p)
- ggsave(paste0(basepath,'sQTL_titration-',xcol,'-vs-',ycol,'.pdf'),p)
+ ggsave(paste0(basepath,'/sQTL_titration-',xcol,'-vs-',ycol,'.png'),p)
+ ggsave(paste0(basepath,'/sQTL_titration-',xcol,'-vs-',ycol,'.pdf'),p)
 }
 
 gg_linechart(res,'n_hcps','Hidden covariates','n_sgenes','Genes containing a QTL','Genes containing a QTL')
 gg_linechart(res,'n_hcps','Hidden covariates','n_phenogenes','sGenes','sGenes')
 gg_linechart(res,'n_hcps','Hidden covariates','n_qtl_introns','sQTL-intron pairs','sQTL-intron pairs')
 gg_linechart(res,'n_hcps','Hidden covariates','n_snps','sQTLs','sQTLs')
-gg_linechart(res,'n_hcps','Hidden covariates','n_introns','sQTL-intron pairs','sQTL-intron pairs')
+gg_linechart(res,'n_hcps','Hidden covariates','n_introns','Introns','Introns')

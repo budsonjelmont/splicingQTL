@@ -20,16 +20,16 @@ ensembl = pd.read_csv(ensemblfile, sep='\t')
 
 ol['Transcript stable ID'] = ol[9].str.split('\.',expand=True)[0]
 
+# Drop duplicate rows or rows where Transcript stable ID is NA before setting index
+ensembl.dropna(axis='rows',subset=['Transcript stable ID'],inplace=True)
+ensembl.drop_duplicates(subset='Transcript stable ID',inplace=True)
+
 ensembl.set_index('Transcript stable ID',inplace=True, verify_integrity=True)
 
 # Column 9 of overlaps contains the ENST ID
 #ol['gene'] = ol[15].str.extract('gene_id \"(ENSG[a-zA-Z0-9]*)\.[0-9]+\"', expand=True)
 uniqueENST = ol['Transcript stable ID'].unique()
 ensembl.loc[uniqueENST].dropna(inplace=True)
-
-# Print unique genes
-#print('# of unique ENSGs: ' + str(len(uniqueENST)))
-print('# of unique ENSGs: ' + str(len(ensembl.loc[uniqueENST].dropna()['Gene stable ID'].unique())))
 
 # Read in fastQTL results
 fqtlout = pd.read_csv(fqtloutfile,sep='\s+') #'/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/significant_sqtl.csv'

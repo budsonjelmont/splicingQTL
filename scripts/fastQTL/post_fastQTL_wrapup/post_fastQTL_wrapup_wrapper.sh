@@ -1,15 +1,25 @@
 # Results directory base
-resdirBase=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/4genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_
+resdirbase=/sc/arion/projects/EPIASD/splicingQTL/output/sqtls/permute/minCovars+seqPC79/4genoPCs
+#isnominal=TRUE # TRUE/FALSE--not used currently, calculateFQTLstats.R counts # columns to determine if results are from permutation or nominal pass
+#fdrmethod=st # {'st','bh'} e.g storey
+annotdir=/sc/arion/projects/EPIASD/splicingQTL/ext_data/other/gencode/hg19/v33lift37
+annotbed=gencode.v33lift37.annotation.bed
+annotidmap=gencode_v33_idmap.txt 
 
 # Parameters to iterate 
 hcps=($(seq 0 5 100))
+declare -a fdr
+fdr=( st bh )
 
 # Loop through the array and ship off each command to bsub
-for nhcps in "${hcps[@]}"
+for fdrmethod in "${fdr[@]}"
 do
-  echo "$nhcps ..."
-  resdir=$resdirBase${nhcps}HCPs
-  command="ml python/3.7.3; ./post_fastQTL_wrapup.sh $resdir"
-  echo $command
-  submitjob 1 -P acc_pintod02b -q premium -c 1 -n 1 -m 10 -J post_fastQTL_wrapup_${nhcps}HCPs ${command} 
+  for nhcps in "${hcps[@]}"
+  do
+    echo "$nhcps ..."
+    resdir=$resdirbase/${nhcps}HCPs
+    command="ml python/3.7.3; ./post_fastQTL_wrapup.sh $resdir $fdrmethod $annotdir $annotbed $annotidmap"
+    echo $command
+    submitjob 8 -P acc_pintod02b -q premium -c 1 -n 1 -m 60 -J post_fastQTL_wrapup_${nhcps}HCPs ${command} 
+  done
 done

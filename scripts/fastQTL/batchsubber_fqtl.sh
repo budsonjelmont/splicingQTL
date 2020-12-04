@@ -9,7 +9,7 @@ vcffile=Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.vcf.gz
 
 countspath=/sc/arion/projects/EPIASD/splicingQTL/output/pheno_wasp/
 
-outpathbase=/sc/arion/projects/EPIASD/splicingQTL/output/fqtl_output_wasp_nominal_normal/minCovars+seqPC9/4genoPCs/
+outpathbase=/sc/arion/projects/EPIASD/splicingQTL/output/permute/minCovars+seqPC9/4genoPCs/
 
 permute=false
 normal=true
@@ -20,7 +20,7 @@ chrs=($(seq 1 1 22))
 
 if [ $permute == 'true' ]
 then
-  permuteflag=" --permute 1000 "
+  permuteflag=" --permute 1000 10000 "
 elif [ $permute == 'false' ]
 then
   permuteflag=""

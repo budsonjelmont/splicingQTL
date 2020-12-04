@@ -5,7 +5,7 @@ import numpy as np
 import scipy.stats as st
 
 # New WASP-treated data
-resdir = sys.argv[1]
+resdir = sys.argv[1] + '/'
 resfile = 'chrAll_combined+qval'
 rescols = ['pid', 'nvar', 'shape1', 'shape2', 'dummy', 'sid', 'dist', 'npval', 'slope', 'ppval', 'bpval','qval']
 
