@@ -1,3 +1,4 @@
+# Read the summary table produced by make_res_table.py and plot the results.   
 setwd('/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/viz/')
 
 library(dplyr)  
@@ -10,12 +11,14 @@ source('vert_regular_bar.R')
 source('abovebelow0_bar.R')
 source('pie_chart.R')
 
-vepdir='/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/results_noRegulatory_111620/'
-plotdir='/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/viz/plots/'
+vepdir='/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/results_noRegulatory_111620/' # Dir containing the VEP results and QTLSNPs.VEPregionAnnotation.summary file made by make_res_table.py 
+plotdir='/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/viz/plots/' # Dir to write the plots to. Create if it doesn't exist.
+bootstrap=TRUE
 
+# Make dir to hold results & cd there
+dir.create(plotdir,recursive=T)
 setwd(plotdir)
 
-bootstrap=TRUE
 if(bootstrap){
   n_sample = 500000 # How many SNPs to sample at random from the bootstrappable SNPs vector
   library(boot)

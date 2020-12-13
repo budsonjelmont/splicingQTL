@@ -3,15 +3,27 @@ library(stringr)
 
 args = commandArgs(trailingOnly=TRUE)
 
-
-resdir=args[1]
+resdir=args[1] # Dir containing the GREGOR results
 resfile='StatisticSummaryFile.txt'
-plottitle=args[2]
-pngout=args[3]
+plottitle=args[2] # Title of plot
+pngout=args[3] # Name of outfile
 
+# Optional: path to a list of IDs for features to include in the plot (default is all)
+#includesfile='/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/Walker2018_data/eQTLs/TFsTested.txt'
+#includesfile='/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/Walker2018_data/sQTLs/RBPsTested.txt'
+#includesfile='/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/Raj_NatComm_alzh2018/RBPsTested.txt'
 #####
 
 df = read.table(paste0(resdir,resfile),stringsAsFactors=FALSE,header=TRUE)
+
+# Make label for each tested feature
+df$feature = str_match(df$Bed_File,'.*-(.+).bed')[,2]
+
+# If an includes file was passed, read the list of features to include & filter the data frame
+if(exists("includesfile")){
+  includes = read.table(includesfile,stringsAsFactors=FALSE,header=FALSE)
+  df = df[which(df$feature %in% includes[,1]),]
+}
 
 # Calculate fold-change over expected # of SNPs
 df$FC = df$InBed_Index_SNP/df$ExpectNum_of_InBed_SNP 
@@ -28,6 +40,9 @@ df$enrichment = 'QTL enrichment'
 # Make label for each tested feature
 df$feature = str_match(df$Bed_File,'.*-(.+).bed')[,2]
 
+# Drop rows where FC is null
+df = df[!is.na(df$FC),]
+
 # Reorder by ascending FC as Walker 2018 did 
 df = df[order(df$FC,decreasing=TRUE),] # This only orders the data frame; ggplot cares about the factor levels
 df$feature = factor(df$feature, levels = df$feature[order(df$FC,decreasing=TRUE)])
@@ -41,19 +56,19 @@ library(ggplot2)
 
 p = ggplot(df, aes(x=feature,y=FC,enrichment, fill=-log10(qval))) +
   geom_bar(stat='identity') +
-  coord_flip() + 
+#  coord_flip() + 
   ggtitle(plottitle) +
   geom_text(aes(label=barlabel), color = 'red', nudge_y=0.05, size = 5) +
-  scale_y_continuous(limits = c(0,4.5)) + 
-  #scale_fill_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 1, limits=c(0,20)) +
-  scale_fill_gradient(low = 'navyblue', high = 'steelblue1', limits=c(0,450)) +
+  scale_y_continuous(limits = c(0,3.5)) + 
+  scale_fill_gradient(low = 'mediumpurple4', high = 'mediumpurple1', limits=c(0,10)) +
+#  scale_fill_gradient(low = 'darkred', high = 'red', limits=c(0,100)) +
   theme(
     plot.title = element_text(hjust = 0.5),
     panel.border = element_blank(),
     panel.grid.major = element_blank(),
 #    panel.border = element_blank(),
     panel.background = element_blank(),
-#    axis.title.x = element_blank(),
+    axis.title.x = element_blank(),
     axis.line.y = element_line(),
     axis.title.y = element_blank(),
     axis.text.y = element_text(color='black', size=10),
@@ -71,7 +86,7 @@ p = ggplot(df, aes(x=feature,y=FC,enrichment, fill=-log10(qval))) +
 
 plot(p)
 
-aspect_ratio = 1.2
-height = 5
+aspect_ratio = 3 
+height = 3
 ggsave(paste0(resdir,pngout,'.png'), plot = p, dpi = 300, height=height, width=height*aspect_ratio)
 ggsave(paste0(resdir,pngout,'.pdf'), plot = p, dpi = 300, height=height, width=height*aspect_ratio)

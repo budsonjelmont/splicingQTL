@@ -1,7 +1,6 @@
 declare -A invcfs
 # Our study
 invcfs[OurStudy_sQTLSNPs]=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/4genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_50HCPs/vcf/all_phase3.dedupeByPos_bestMAF.OurStudy_sQTLSNPs_ALL.vcf
-#invcfs[OurStudy_nonsQTLSNPs]=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/4genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_50HCPs/vcf/all_phase3.dedupeByPos_bestMAF.OurStudy_nonsQTLSNPs_ALL.vcf 
 invcfs[OurStudy_allSNPs]=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/geno_wasp/vcf/all_phase3.dedupeByPos_bestMAF.our_allQTLsnps_ALL.vcf
 # Walker
 invcfs[Walker_sQTLSNPs]=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/Walker2018_data/sQTLs/vcf/all_phase3.dedupeByPos_bestMAF.Walker_sQTLSNPs_ALL.vcf

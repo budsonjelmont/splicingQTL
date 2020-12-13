@@ -2,6 +2,25 @@
 # PCs 1-4, labeling 1kG samples by population & assigning all other samples to population='This Study'
 # Additionally, generate plot w/ 95% confidence ellipses drawn around each 1kG population.
 
+library(reshape2)
+
+outpath='/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA/'
+setwd(outpath)
+options(scipen=100, digits=3)
+
+basepath='/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA/' # This is the path where the PCA output lives
+basefile='Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.COPY.1kg_phase3_bestMAF' # This is the base name of the .eigenval & .eigenvec files
+meta1kgfile='/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/PCA/1kg_phase3_samplesuperpopinferreddata.txt'
+#estimate_ancestry=TRUE # Should an ancestry estimation be returned? This will also add ancestry ellipses to the plots written by ggbiplot() # Not used currently--generate these files always
+
+########################################################
+
+# Confidence level to use when drawing ellipse to estimate sample ancestry
+conflevel=0.95
+
+# Plot params
+pwidth = 13
+
 # PCA plot func
 ggbiplot = function(eigenvec,x,y,savepath){
   pcx = paste0('PC',as.character(x))
@@ -52,22 +71,7 @@ est_ancestry = function(eigenvec,g,x,y,conflevel,savepath){
   return(eigenvec) 
 }
 
-# Biplots of genotype PCA results
-library(reshape2)
-
-outpath='/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA/'
-setwd(outpath)
-options(scipen=100, digits=3)
-
-basepath='/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA/' # This is the path where the PCA output lives
-basefile='Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.COPY.1kg_phase3_bestMAF' # This is the base name of the .eigenval & .eigenvec files
-meta1kgfile='/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/PCA/1kg_phase3_samplesuperpopinferreddata.txt'
-#estimate_ancestry=TRUE # Should an ancestry estimation be returned? This will also add ancestry ellipses to the plots written by ggbiplot() # Not used currently--generate these files always
-
-conflevel=0.95 # Confidence level to use when drawing ellipse to estimate sample ancestry
-
-# Plot params
-pwidth = 13
+##############################################################
 
 # read in the eigenvectors, produced in PLINK
 eigenvec = data.frame(read.table(paste0(basepath,basefile,'.eigenvec'), header=FALSE, skip=0, sep=' '))
