@@ -6,20 +6,19 @@
 #BSUB -n 16
 #BSUB -W 0:20
 #BSUB -R rusage[mem=40000]
-#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/cleanVCF_dropDupesForPeddy_%J_output.txt
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/cleanVCF_dropDupesForPeddy_%J_output.txt
 
 module load plink/1.90
 ml python/3.7.3
 
-#vcfPath='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/'
-vcfPath='/sc/orga/scratch/belmoj01/splicingQTL/'
-vcfFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5'
+vcfdir=/sc/arion/projects/EPIASD/PsychENCODE_phase12_genotypes/Capstone4VCFreformat/
+vcffile=Capstone4.sel.idsync.2allele
 
 # Generate missing genotype stats
-plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --missing --out ${vcfFile}.missingStats
+plink --vcf $vcfdir/$vcffile.vcf --double-id --missing --out $vcfdir/$vcffile.missingStats
 # Make relatedness report
-plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --genome --out ${vcfFile}.relatedness
+plink --vcf $vcfdir/$vcffile.vcf --double-id --genome --out  $vcfdir/$vcffile.relatedness
 # Make list of people to drop
-python3 makeRelatedExcludeList.py ${vcfFile}.missingStats.imiss ${vcfFile}.relatedness.genome
+python3 makeRelatedExcludeList.py  $vcfdir/$vcffile.missingStats.imiss  $vcfdir/$vcffile.relatedness.genome
 # Drop them
-plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --remove SamplesToExcludeForPCA.txt --out ${vcfPath}${vcfFile}.deduped --recode vcf-iid
+plink --vcf $vcfdir/$vcffile.vcf --autosome --double-id --remove $vcfdir/SamplesToExcludeForPCA.txt --out $vcfdir/$vcffile.deduped --recode vcf-iid

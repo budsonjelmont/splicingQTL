@@ -1,8 +1,13 @@
+# Read in the plink .eigenvec & .eigenval files produced by merge1kgGenotypePCA.sh & plot all combinations of
+# PCs 1-4, labeling 1kG samples by population & assigning all other samples to population='This Study'
+# Additionally, generate plot w/ 95% confidence ellipses drawn around each 1kG population.
+
+# PCA plot func
 ggbiplot = function(eigenvec,x,y,savepath){
   pcx = paste0('PC',as.character(x))
   pcy = paste0('PC',as.character(y))
   g = ggplot(eigenvec,aes_string(x=pcx,y=pcy,color='ancestry',fill='ancestry')) +
-  geom_point(alpha = 0.25, shape = 16, size=2.5) +
+  geom_point(alpha = 0.5, shape = 16, size=2.5) +
   xlab(pcx) +
   ylab(pcy) +
   scale_color_manual(values=colscale,name='Ancestry') +
@@ -14,16 +19,19 @@ ggbiplot = function(eigenvec,x,y,savepath){
     panel.background = element_blank(),
     axis.line.x = element_line(color='black', size = 0.4),
     axis.line.y = element_line(color='black', size = 0.4),
-    axis.title.x = element_text(color='black', size = 14),
-    axis.title.y = element_text(color='black', size = 14),
-    axis.text = element_text(color = 'black', size = 11),
+    axis.title.x = element_text(color='black', size = 15),
+    axis.title.y = element_text(color='black', size = 15),
+    axis.text = element_text(color = 'black', size = 13),
     plot.margin=unit(c(t=15,r=17,b=17,l=17),'pt'),
-    panel.border = element_rect(colour = 'black', fill=NA, size=2)
+    panel.border = element_rect(colour='black', fill=NA, size=1),
+    legend.text = element_text(colour='black', size=15)
   )
   ggsave(paste0(savepath,'ancestryPCA_',pcx,'vs',pcy,'.png'), width=pwidth, plot = g)
+  ggsave(paste0(savepath,'ancestryPCA_',pcx,'vs',pcy,'.pdf'), width=pwidth, plot = g)
   return(g)
 } 
 
+# Draw plot w/ 95% confidence ellipses around each population 
 est_ancestry = function(eigenvec,g,x,y,conflevel,savepath){
   pcx = paste0('PC',as.character(x))
   pcy = paste0('PC',as.character(y))
@@ -44,30 +52,17 @@ est_ancestry = function(eigenvec,g,x,y,conflevel,savepath){
   return(eigenvec) 
 }
 
-# Make loadings heatmap (reqs library ComplexHeatmap)
-plot_loadings = function(eigenvec,eigenval,outpath,basefile){
- pc_cols = grep('^PC[.]*', colnames(eigenvec), value = T, perl=T)
- product = sweep(eigenvec, 2, sqrt(eigenval), FUN='*')
- png(paste0(outpath,basefile,'.pca_loadings.png'))
- Heatmap(eigenvec[,pc_cols], name = 'PCA loadings 1:20',
-        show_row_names = FALSE, show_column_names = TRUE, 
-        row_dend_reorder = FALSE, column_dend_reorder = FALSE, 
-        cluster_rows = FALSE, cluster_columns = FALSE, column_order = paste0('PC', c(1:20)),
-        use_raster = TRUE, raster_device = 'png', raster_quality = 16)
- dev.off()
-}
-
 # Biplots of genotype PCA results
 library(reshape2)
 
-outpath='/sc/arion/projects/EPIASD/splicingQTL/PCA/'
+outpath='/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA/'
 setwd(outpath)
 options(scipen=100, digits=3)
 
-basepath='/sc/arion/scratch/belmoj01/splicingQTL/' # This is the path where the PCA output lives
-basefile='Capstone4.sel.idsync.2allele.1kg_phase3' # This is the base name of the .eigenval & .eigenvec files
-meta1kgfile='/sc/arion/projects/EPIASD/splicingQTL/PCA/1kg_phase3_samplesuperpopinferreddata.txt'
-#estimate_ancestry=TRUE # Should an ancestry estimation be returned? This will also add ancestry ellipses to the plots written by ggbiplot()
+basepath='/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA/' # This is the path where the PCA output lives
+basefile='Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.COPY.1kg_phase3_bestMAF' # This is the base name of the .eigenval & .eigenvec files
+meta1kgfile='/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/PCA/1kg_phase3_samplesuperpopinferreddata.txt'
+#estimate_ancestry=TRUE # Should an ancestry estimation be returned? This will also add ancestry ellipses to the plots written by ggbiplot() # Not used currently--generate these files always
 
 conflevel=0.95 # Confidence level to use when drawing ellipse to estimate sample ancestry
 
@@ -87,10 +82,14 @@ colnames(ped)[3] = 'ancestry'
 ped = ped[which(ped$IID %in% rownames(eigenvec)), ]
 rownames(ped) = ped$IID
 
-#ped = ped[match(rownames(eigenvec), ped$IID),]
-#all(ped$IID == rownames(eigenvec)) == TRUE
-
 summary(eigenvec)
+
+# Calculate proportion of variance explained
+rbind(
+  SD = sqrt(eigenval),
+  Proportion = eigenval/sum(eigenval),
+  Cumulative = cumsum(eigenval)/sum(eigenval)
+)
 
 # Read in metadata
 # Add ancestry column to eigenvalues dataframe

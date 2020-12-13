@@ -1,12 +1,14 @@
+# Merge plink formatted target dataset file w/ 1kG reference (also in plink binary fileset format)
+# Remove linked sited first, then QC both datasets. Align SNPs common to both datasets, & check for chr/pos mismatches & allele flips. Also remove related individuals (pi_hat > 0.2) in the reference (you should've done this already on the target dataset though). 
 # Based on vignette here: https://meyer-dfflab-cshl.github.io/plinkQC/articles/AncestryCheck.html
 ml plink
 ml python/3.7.3 # Used for py script to compare related individuals & generate list of relatives to drop
 
-datdir=/sc/arion/scratch/belmoj01/pca_script_test_new_with_within
-name=ASD-Epi_Plates1-6_gendercorrected.unrelated
-refdir=/sc/arion/projects/pintod02c/1kg_phase3/
-refname=all_phase3
-reference=1kg_phase3_nodedupe
+datdir=/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_PCA
+name=Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.COPY
+refdir=/sc/arion/scratch/belmoj01/QTL_VCF
+refname=all_phase3.dedupeByPos_bestMAF
+reference=1kg_phase3_bestMAF
 highld=/sc/hydra/projects/pintod02c/reference-databases/high_LD_regions/high_ld_and_autsomal_regions_hg19.txt
 popfile=/sc/hydra/projects/pintod02c/1kg_phase3/1kg_phase3_samplesuperpopinferreddata-FID0.txt
 
@@ -23,13 +25,13 @@ pyscrpath=/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/PCA
 mkdir -p $datdir/plink_log
 
 # Prune study data by pruning sites in LD & also removing pre-computed high-LD areas
-plink --bfile  $datdir/$name \
+plink --bfile $datdir/$name \
       --exclude range $highld \
       --indep-pairwise $ldwindow $ldstep $ldr2 \
       --out $datdir/$name
 mv  $datdir/$name.prune.log $datdir/plink_log/$name.prune
 
-plink --bfile  $datdir/$name \
+plink --bfile $datdir/$name \
       --autosome \
       --biallelic-only --maf $maf --mind $mind \
       --extract $datdir/$name.prune.in \
@@ -38,7 +40,7 @@ plink --bfile  $datdir/$name \
 mv  $datdir/$name.pruned.log $datdir/plink_log/$name.pruned
 
 # Filter reference data for the same SNP set as in study
-plink --bfile  $refdir/$refname \
+plink --bfile $refdir/$refname \
       --allow-extra-chr \
       --biallelic-only --maf $maf --mind $mind \
       --extract $datdir/$name.prune.in \
@@ -116,7 +118,7 @@ mv $datdir/$name.merge.$refname.log $datdir/plink_log/
 plink --bfile $datdir/$name.merge.$refname \
       --pca \
       --genome \
-      --out $datdir/$name.$reference #--within $popfile --pca-cluster-names AFR SAS EAS EUR AMR
+      --out $datdir/$name.$reference #--within $popfile --pca-cluster-names AFR SAS EAS EUR AMR # See section Dimension reduction here: https://www.cog-genomics.org/plink/1.9/strat
 mv $datdir/$name.$reference.log $datdir/plink_log
 
 plink --bfile $datdir/$name.merge.$refname \

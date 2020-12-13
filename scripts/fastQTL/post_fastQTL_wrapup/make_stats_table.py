@@ -17,17 +17,20 @@ os.makedirs(outdir, exist_ok=True)
 summarydf = pd.DataFrame(columns=['n_hcps','n_qtl_introns','n_introns','n_clusts','n_snps','n_sgenes','n_phenogenes'])
 
 for n in [x for x in range(0,105,5)]:
-  resdir=basepath + '/' + str(n) + 'HCPs/' + subdir + '/'
-  print(resdir)
-  res=pd.read_csv(resdir + 'qtls+pid_ensg+sid_ensg.txt',sep='\t')
-  summarydf = summarydf.append(pd.Series(
-    {'n_hcps':n,
-     'n_qtl_introns':res.drop_duplicates(['sid','pid']).shape[0],
-     'n_introns':res['pid'].nunique(),
-     'n_clusts':res['pid'].str.split(':',expand=True)[3].nunique(),
-     'n_snps':res['sid'].nunique(),
-     'n_sgenes':res['sid_ensg'].nunique(),
-     'n_phenogenes':res['pid_ensg'].nunique()
-    }),ignore_index=True)
+  try:
+    resdir=basepath + '/' + str(n) + 'HCPs/' + subdir + '/'
+    print(resdir)
+    res=pd.read_csv(resdir + 'qtls+pid_ensg+sid_ensg.txt',sep='\t')
+    summarydf = summarydf.append(pd.Series(
+      {'n_hcps':n,
+       'n_qtl_introns':res.drop_duplicates(['sid','pid']).shape[0],
+       'n_introns':res['pid'].nunique(),
+       'n_clusts':res['pid'].str.split(':',expand=True)[3].nunique(),
+       'n_snps':res['sid'].nunique(),
+       'n_sgenes':res['sid_ensg'].nunique(),
+       'n_phenogenes':res['pid_ensg'].nunique()
+      }),ignore_index=True)
+  except FileNotFoundError as not_found:
+    print('No qtls+pid_ensg+sid_ensg.txt file found in ' + basepath + '/' + str(n) + 'HCPs. Skipping...')
 
 summarydf.sort_values('n_hcps',ascending=False).to_csv(outdir + '/HCP_titration_summary.tsv',sep='\t',index=False)

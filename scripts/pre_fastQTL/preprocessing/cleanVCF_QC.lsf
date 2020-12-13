@@ -12,10 +12,11 @@ module load plink/1.90
 ml bcftools
 ml vcftools
 
-vcfPath='/sc/orga/projects/EPIASD/PsychENCODE_phase12_genotypes/Capstone4VCFreformat/'
-vcfFile='Capstone4.sel.idsync.vcf'
-#vcfOutPath='/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/geno/'
-vcfOutPath='/sc/orga/scratch/belmoj01/splicingQTL/'
-vcfQCedFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1'
+vcfdir=/sc/arion/scratch/belmoj01/splicingQTL/
+vcffile=Capstone4.sel.idsync.vcf
+vcfoutdir=/sc/arion/scratch/belmoj01/splicingQTL/
+vcfQCedfile=Capstone4.sel.idsync.2allele.maf01.mind05.geno05
 
-plink --vcf ${vcfPath}${vcfFile} --double-id --biallelic-only --maf 0.05 --mind 0.01 --geno 0.01 --out ${vcfOutPath}${vcfQCedFile} --recode vcf-iid
+mkdir -p $vcfoutdir
+
+plink --vcf $vcfdir/$vcffile --double-id --biallelic-only --maf 0.01 --mind 0.05 --geno 0.05 --out $vcfoutdir/$vcfQCedfile --recode vcf-iid
