@@ -13,9 +13,9 @@ ml bcftools
 ml vcftools
 
 vcfdir=/sc/arion/scratch/belmoj01/splicingQTL/
-vcffile=Capstone4.sel.idsync.vcf
+vcffile=Capstone4.sel.hasPhenosOnly.idsync.vcf
 vcfoutdir=/sc/arion/scratch/belmoj01/splicingQTL/
-vcfQCedfile=Capstone4.sel.idsync.2allele.maf01.mind05.geno05
+vcfQCedfile=Capstone4.sel.hasPhenosOnly.idsync.2allele.maf01.mind05.geno05
 
 mkdir -p $vcfoutdir
 

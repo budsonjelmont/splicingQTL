@@ -8,7 +8,6 @@ parser.add_argument('metafile', metavar='metafile', type=str, nargs=1, help='Pat
 parser.add_argument('outfile', metavar='outfile', type=str, nargs=1, help='Path to write output file')
 
 args = parser.parse_args()
-#args = parser.parse_args('/sc/arion/projects/EPIASD/splicingQTL/output/pheno_wasp/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts /sc/arion/projects/EPIASD/splicingQTL/data/metadata/meta_matchedIDs.csv /sc/arion/projects/EPIASD/splicingQTL/output/pheno_wasp/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync_test'.split(' '))
 
 incountsfile=args.incountsfile[0]
 metafile=args.metafile[0]
@@ -16,6 +15,10 @@ outfile=args.outfile[0]
 
 incounts = pd.read_csv(incountsfile,sep=' ')
 meta = pd.read_csv(metafile)
+
+# If this is the *_perind_numers.counts file, name first column 'chrom' to match the *_perind.counts file 
+if not 'chrom' in incounts.columns:
+  incounts['chrom'] = incounts.index
 
 # Make list of columns to keep
 keepme = ['chrom']
