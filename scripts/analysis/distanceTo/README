@@ -1,0 +1,1 @@
+Given sorted 2 bed files A (6 columns) and B (6 or 9 columns), find the closest feature in B for each feature in A. Writes results out to a file in the same dir as A called [A]_bedtoolsClosest_[B], and then merges the closest feature & distance into the qtls.txt file under a new column header supplied by the user. 

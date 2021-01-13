@@ -1,0 +1,1 @@
+./get_closest.sh /sc/arion/projects/EPIASD/splicingQTL/ext_data/QTLs/Raj2018/qtl_leadsnps_unique.sorted.bed /sc/arion/scratch/belmoj01/v31lift37_tss.sorted.bed /sc/arion/projects/EPIASD/splicingQTL/ext_data/QTLs/Raj2018/qtls.txt test sid 
