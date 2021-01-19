@@ -19,9 +19,9 @@ metadatafile=/sc/arion/projects/EPIASD/splicingQTL/metadata/meta_matchedIDs.csv
 seqedvcffile=${oldvcffile}.hasPhenosOnly
 newvcfpath=/sc/arion/scratch/belmoj01/splicingQTL/
 newvcffile=${seqedvcffile}.idsync
+extractme=/sc/arion/projects/EPIASD/splicingQTL/data/metadata/subsets/meta_matchedIDs_highestRINSampleperSubject_total_1310.idmap
 
 # Extract subjects who have RNAseq data 
-extractme=/sc/arion/projects/EPIASD/splicingQTL/data/metadata/subsets/meta_matchedIDs_highestRINSampleperSubject_total_1310.idmap
 plink --vcf $oldvcfpath/${oldvcffile}.vcf --double-id --keep $extractme --recode vcf-iid --out $newvcfpath/$seqedvcffile
 # Remap their IDs to be consistent with those found in the leafcutter counts file
 plink --vcf $newvcfpath/$seqedvcffile.vcf --double-id --update-ids $extractme --recode vcf-iid --out $newvcfpath/$newvcffile

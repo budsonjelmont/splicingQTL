@@ -1,0 +1,1 @@
+Scripts for splitting a VCF file containing multiple samples into many VCF files, each one containing a single sample

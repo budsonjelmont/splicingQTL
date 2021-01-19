@@ -6,14 +6,16 @@
 #BSUB -n 16
 #BSUB -W 0:20
 #BSUB -R rusage[mem=40000]
-#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/plinkPCA_%J_output.txt
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/plinkPCA_%J_output.txt
 
 module load plink/1.90
 ml bcftools
 ml vcftools
 
-vcfPath='/sc/orga/work/belmoj01/sqtl/genodir/Capstone4VCFreformat/'
-vcfFile='Capstone4.sel.idsync.2allele.maf5.mind1.geno1.hwe1e-5.deduped.highLDexcl.indep1500_150_.2.vcf.gz'
-outPath='/sc/orga/projects/EPIASD/splicingQTL/PCA/plinkPCAresults/Capstone4.sel.idsync.--thin-count1000000/'
+vcfdir=/sc/arion/scratch/belmoj01/splicingQTL/
+vcffile=Capstone4.sel.hasPhenosOnly.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped
+outdir=/sc/arion/projects/EPIASD/splicingQTL/output/geno_wasp/geno_pca_res/${vcffile}--thin-count200000/
 
-plink --vcf ${vcfPath}${vcfFile}.vcf --double-id --thin-count 1000000 --pca 'header' --out ${outPath}${vcfFile}
+mkdir -p $outdir
+
+plink --vcf $vcfdir/$vcffile.vcf --double-id --thin-count 200000 --pca header --out $outdir/$vcffile

@@ -1,0 +1,1 @@
+./split_vcf.sh /sc/arion/projects/EPIASD/splicingQTL/data/metada/subsets/meta_matchedIDs_highestRINSampleperSubject_total_1310.idmap 2 /sc/arion/scratch/belmoj01/splicingQTL/Capstone4.sel.hasPhenosOnly.idsync.2allele.maf01.mind05.geno05.hwe1e-6.vcf /sc/arion/scratch/belmoj01/splicingQTL/vcf_split

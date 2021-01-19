@@ -11,7 +11,5 @@
 # See reference here: http://davidaknowles.github.io/leafcutter/articles/sQTL.html
 ml python/3.7.3
 ml leafcutter
-#countsPath='/sc/arion/scratch/belmoj01/phenoworkdir/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind_numers.counts.idsync.gz' #Counts
-#countsPath='/sc/arion/work/belmoj01/sqtl/rename_workdir/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.gz' #Ratios
 countsPath='/sc/arion/scratch/belmoj01/splicingQTL/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz' #Ratios
 python /hpc/packages/minerva-common/leafcutter/1.0/leafcutter/scripts/prepare_phenotype_table.py ${countsPath} -p 20

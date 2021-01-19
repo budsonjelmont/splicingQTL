@@ -1,3 +1,5 @@
+# Add genotype PCs to leafcutter covariates for downstream use in fastQTL. Reads leafcutter covariates & PCA results as well as *relatedness.genome file from Plink. For any subjects who were dropped prior to PCA (because a relation/duplicate sample was present), take the genotype PCs from the sample that was retained and add them to the covariates. 
+
 import pandas as pd
 import sys
 
@@ -22,7 +24,11 @@ except pd.errors.EmptyDataError:
   dropped = False
 
 # Read mapping files
-idmap = pd.read_csv(metadatfile)
+if metadatfile[-4:] == '.csv':
+  sep=','
+else:
+  sep='\t'
+idmap = pd.read_csv(metadatfile,sep=sep)
 
 # Process pca file w/ new sample names (& duplicate rows as needed)
 pca = pd.read_csv(pcafile, sep='\s+')
