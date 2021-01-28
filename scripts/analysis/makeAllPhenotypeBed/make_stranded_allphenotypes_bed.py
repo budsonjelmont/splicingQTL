@@ -56,4 +56,4 @@ bed = leftjoined.groupby(['chr','start','end'])[['ID','4_x',5]].first().reset_in
 print(str(bed.loc[~pd.isna(bed[5])].shape[0]) + ' rows out of ' + str(bed.shape[0]) + 'matched to a .junc file intron')
 bed = bed.loc[~pd.isna(bed[5])]
 
-bed.to_csv(phenoDir + 'Phenotype_new.bed', index=False, header=False, sep='\t')
+bed.to_csv(phenoDir + 'Phenotype.bed', index=False, header=False, sep='\t')

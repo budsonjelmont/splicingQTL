@@ -52,13 +52,13 @@ vert_group_multibar = function(dat,fill,grp,xcol,xname,yname,palette,outpath){
       panel.background = element_blank(),
       axis.line.x = element_line(color='black', size=0.6),
       axis.line.y = element_line(color='black', size=0.6),
-      axis.text.x = element_text(colour='black', size=11),
-      axis.text.y = element_text(colour='black', size=11),
-      axis.title.x = element_text(margin=margin(t=0, r=0, b=10.8, l=0), size=12),
-      axis.title.y = element_text(margin=margin(t=0, r=10.5, b=0, l=0), size=12),
+      axis.text.x = element_text(colour='black', size=15),
+      axis.text.y = element_text(colour='black', size=15),
+      axis.title.x = element_text(margin=margin(t=0, r=0, b=10.8, l=0), size=17),
+      axis.title.y = element_text(margin=margin(t=0, r=10.5, b=0, l=0), size=17),
       axis.ticks = element_blank(),
       legend.position = c(.75,.875),
-      legend.text = element_text(size = 12),
+      legend.text = element_text(size = 15),
       legend.title=element_blank(),
       plot.margin=unit(c(0.25,1,0.25,1), 'cm')
     )
@@ -96,9 +96,12 @@ table(meta$study)
 # Make plots 
 # Reported ancestry
 vert_group_bar(meta,'ethnicity','ethnicity','ethnicity','Ethnicity','Subjects','Dark2','sQTL_subject_ancestry.png')
+vert_group_bar(meta,'ethnicity','ethnicity','ethnicity','Ethnicity','Subjects','Dark2','sQTL_subject_ancestry.pdf')
 vert_group_bar(meta,'study','study','study','Study','Subjects','Dark2','sQTL_subjects_per_study.png')
+vert_group_bar(meta,'study','study','study','Study','Subjects','Dark2','sQTL_subjects_per_study.pdf')
 # Multibar
 vert_group_multibar(meta,'ethnicity','study','study','Study','Subjects','Dark2','sQTL_subjects_per_study_mbar_v2.png')
+vert_group_multibar(meta,'ethnicity','study','study','Study','Subjects','Dark2','sQTL_subjects_per_study_mbar_v2.pdf')
 # Estimated ancestry using 1kg PCA projection
 vert_group_bar(meta,'ethnicity_est','ethnicity_est','ethnicity_est','Ethnicity','Subjects','Dark2','sQTL_subject_estimated_ancestry.png')
 vert_group_bar(meta,'ethnicity_est','study','study','Study','Subjects','Dark2','sQTL_subject_estimated_ancestry_by_study.png')

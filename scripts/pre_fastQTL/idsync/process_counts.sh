@@ -11,7 +11,7 @@
 ml python/3.7.3
 
 countsdir=/sc/arion/projects/EPIASD/splicingQTL/output/pheno_wasp
-countsfile=out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind_numers.counts
+countsfile=out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts
 metadatfile=/sc/arion/projects/EPIASD/splicingQTL/data/metadata/subsets/meta_matchedIDs_highestRINSampleperSubject_total_1310.tsv
 outdir=$countsdir
 

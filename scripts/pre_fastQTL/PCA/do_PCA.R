@@ -1,7 +1,6 @@
 library(factoextra)
 
 infile = '/sc/orga/work/belmoj01/sqtl/rename_workdir/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.gz.qqnorm.AllCombined'
-#infile = '/sc/orga/work/belmoj01/sqtl/rename_workdir/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.gz.phen_AllCombined'
 
 df = read.table(infile)
 

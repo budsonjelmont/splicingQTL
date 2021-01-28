@@ -21,6 +21,8 @@ newvcfpath=/sc/arion/scratch/belmoj01/splicingQTL/
 newvcffile=${seqedvcffile}.idsync
 extractme=/sc/arion/projects/EPIASD/splicingQTL/data/metadata/subsets/meta_matchedIDs_highestRINSampleperSubject_total_1310.idmap
 
+mkdir -p $newvcfpath
+
 # Extract subjects who have RNAseq data 
 plink --vcf $oldvcfpath/${oldvcffile}.vcf --double-id --keep $extractme --recode vcf-iid --out $newvcfpath/$seqedvcffile
 # Remap their IDs to be consistent with those found in the leafcutter counts file
