@@ -3,25 +3,24 @@ import pandas as pd
 import glob
 
 # New WASP-treated data
-phenoDir='/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/pheno_wasp/'
-phenoFile='out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_allCombined'
-combojuncFile='/sc/arion/projects/pintod02b/capstone/leafcutter/data-freeze4/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01/junctions/all_juncs_combined.junc'
+phenoDir='/sc/arion/projects/EPIASD/splicingQTL/output/leafcutter_analysis2/'
+phenoFile='out-analysis-2_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_allCombined'
+combojuncFile='/sc/arion/projects/pintod02c/WASP_leafcutter/analysis_1_hybrid/file_not_found'
 
-juncpath = '/sc/arion/projects/pintod02b/capstone/leafcutter/data-freeze4/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01/junctions'
+juncpath = '/sc/arion/projects/pintod02c/WASP_leafcutter/analysis_2_cross-disorder-DS/out-analysis-2_clusters_ilen100kb_reads50_ratio0.01/junctions/'
 all_juncs = glob.glob(juncpath + '/*.junc')
 
-# Read and concatenate all .junc files
-#li = []
-
-#for filename in all_juncs:
-#    df = pd.read_csv(filename, sep='\s+', header=None)
-#    li.append(df)
-
-#junc = pd.concat(li, axis=0, ignore_index=True)
-
-# Read combined .junc file directly
-junc = pd.read_csv(combojuncFile, sep='\s+', header=None)
-#junc = pd.read_csv('/sc/arion/projects/pintod02b/capstone/leafcutter/data-freeze4/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01/junctions/all_juncs_combined_headn1000.junc', sep='\s+', header=None)
+# Read combined .junc file directly. If it doesn't exist, create it from the .junc files in the juncpath dir
+try:
+ junc = pd.read_csv(combojuncFile, sep='\s+', header=None)
+except FileNotFoundError:
+  print('Could not open the concatenated junctions file. Creating new file from the .junc files in ' + juncpath)
+  # Read and concatenate all .junc files
+  li = []
+  for filename in all_juncs:
+    df = pd.read_csv(filename, sep='\s+', header=None)
+    li.append(df)
+  junc = pd.concat(li, axis=0, ignore_index=True)
 
 # Strip 'chr' from chromosome column
 junc[0] = junc[0].str.replace('chr','').str.strip()

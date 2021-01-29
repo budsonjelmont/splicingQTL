@@ -7,24 +7,25 @@ cl = makeCluster(20)
 registerDoParallel(cl)
 
 # Read input files
-countsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/pheno/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_AllCombined'
-#countsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/fqtl_input/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.gz.phen_AllCombined'
-#countsoutfile = '/sc/orga/work/belmoj01/sqtl/fastqtl_input/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.gz.phen_AllCombined.sc.qnorm'
-#metadatfile = '/sc/orga/work/belmoj01/sqtl/sampleidmaps/meta_matchedIDs.csv'
-#covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar/leafcutter-input_covar.txt.4PlinkGenoPCs.idsync.10splicingPCs.txt'
-covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar/leafcutter-input_covar.20genoPCs.idsync.10splicingPCs.deduped.txt'
-#covarsfile = '/sc/orga/projects/EPIASD/splicingQTL/intermediate_files/covar/leafcutter-input_covar.txt.4GenoPCs_noQC.idsync'
-dropfile = '/sc/orga/projects/EPIASD/splicingQTL/varPart/dropTerms.txt'
+countsfile = '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/pheno_wasp/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_allCombined'
+covarsfile = '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/covar_wasp/leafcutter-input_covar_WASP.20genoPCs.idsync.deduped.10splicingPCs.txt'
+dropfile = '/sc/arion/projects/EPIASD/splicingQTL/varPart/dropTerms.txt'
 
-vpartpath = '/sc/orga/projects/EPIASD/splicingQTL/varPart/'
+vpartpath = '/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/varPart/'
 
 setwd(vpartpath)
 
-counts = read.table(countsfile, header=TRUE, comment.char='@')
+counts = read.table(countsfile, header=TRUE, stringsAsFactors=FALSE, comment.char='@')
+
+# Drop duplicate rows created by cat'ing all the prepare pheno table output
+counts=counts[-which(counts$ID=='ID'),]
 
 # Drop first column after setting row names
 rownames(counts) = counts$ID
 counts = counts[ , !(colnames(counts) %in% colnames(counts)[1:4])]
+
+# Coerce data frame to numeric
+counts = as.data.frame(sapply(counts, as.numeric))
 
 # Standardize across samples
 #counts.sc = apply(counts, 2, scale)
@@ -55,9 +56,9 @@ for (i in colnames(covars)[!colnames(covars) %in% catcols]){
 }
 
 covars[,!colnames(covars) %in% catcols] = scale(covars[,!colnames(covars) %in% catcols], center = TRUE, scale = TRUE)  
-
-# Define formula
-form = ~ (1|study) + (1|sex) + RIN + (1|tissue) + genotypePC1 + genotypePC2 + genotypePC3 + genotypePC4 + genotypePC5 + genotypePC6 + genotypePC7 + genotypePC8 + genotypePC9 + genotypePC10 + genotypePC11 + genotypePC12 + genotypePC13 + genotypePC14 + genotypePC15 + genotypePC16 + genotypePC17 + genotypePC18 + genotypePC19 + genotypePC20 + seqPC9 #+ HCP1 + HCP2 + HCP3 + HCP4 + HCP5
+#### Define formula ####
+#form = ~ (1|study) + (1|sex) + RIN + (1|tissue) + genotypePC1 + genotypePC2 + genotypePC3 + genotypePC4 + genotypePC5 + genotypePC6 + genotypePC7 + genotypePC8 + genotypePC9 + genotypePC10 + genotypePC11 + genotypePC12 + genotypePC13 + genotypePC14 + genotypePC15 + genotypePC16 + genotypePC17 + genotypePC18 + genotypePC19 + genotypePC20 # Minimal covariates
+form = ~ (1|study) + (1|sex) + RIN + (1|tissue) + seqPC9 + genotypePC1 + genotypePC2 + genotypePC3 + genotypePC4 + genotypePC5 + genotypePC6 + genotypePC7 + genotypePC8 + genotypePC9 + genotypePC10 + genotypePC11 + genotypePC12 + genotypePC13 + genotypePC14 + genotypePC15 + genotypePC16 + genotypePC17 + genotypePC18 + genotypePC19 + genotypePC20 + seqPC7 + seqPC9 # Minimal covariates+seqPC7,9
 #form = ~ (1|study) + (1|sex) + RIN + (1|tissue) + seqPC1 + seqPC2 + seqPC4 + seqPC6 + seqPC7 + seqPC8 + seqPC9 + seqPC11 + genotypePC1 + HCP1 + HCP2 + HCP3 + HCP4 + HCP5 + HCP6 + HCP7 + HCP8 + HCP9 + HCP10 #+ HCP11 + HCP12 + HCP13 + HCP14 + HCP15 + HCP16 + HCP17 + HCP18 + HCP19 + HCP20 # ALL covariates
 #form = ~ (1|Group) + ageDeath + (1|study) + (1|sex) + PMI + RIN + (1|tissue) + seqPC3.squared + seqPC5 + seqPC6 + seqPC7 + seqPC8 + seqPC9 + seqPC10 + seqPC11 + seqPC12 + seqPC13 + seqPC14 + seqPC15 + seqPC16 + seqPC17 + seqPC18 + seqPC19 + seqPC20 + seqPC21 + seqPC22 + seqPC23 + seqPC24 + seqPC25 + seqPC26 + seqPC27 + seqPC28 + seqPC29 + genotypePC1 + genotypePC2 + genotypePC3 + genotypePC4 + splicingPC3 + splicingPC6 + splicingPC7 + splicingPC8 + splicingPC9 + splicingPC10 + HCP1 + HCP2 + HCP3 + HCP4 + HCP5 + HCP6 + HCP7 + HCP8 + HCP9 + HCP10 + HCP11 + HCP12 + HCP13 + HCP14 + HCP15 + HCP16 + HCP17 + HCP18 + HCP19 + HCP20
 

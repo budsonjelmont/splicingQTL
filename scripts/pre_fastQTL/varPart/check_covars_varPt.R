@@ -9,7 +9,7 @@ registerDoParallel(cl)
 # Read input files
 countsfile = '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/pheno_wasp/out-extra3-100kb-covar_clusters_ilen100kb_reads50_ratio0.01_perind.counts.idsync.deduped.gz.qqnorm_allCombined'
 covarsfile = '/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/covar_wasp/leafcutter-input_covar_WASP.20genoPCs.idsync.deduped.10splicingPCs.txt'
-dropfile = '/sc/arion/projects/EPIASD/splicingQTL/varPart/dropTerms.txt'
+dropfile = '/sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/varPart/dropTerms.txt'
 
 vpartpath = '/sc/arion/projects/EPIASD/splicingQTL/varPart/'
 

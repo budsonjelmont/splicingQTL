@@ -2,19 +2,20 @@ module load ucsc-utils/2015-04-07
 
 chainfile=/hpc/packages/minerva-centos7/liftover/09-Jul-2019/hg19ToHg38.over.chain
 
-# Liftover our sQTLs
-#indir=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/
-#infiles=(allphenos.bed allphenos_unique.bed allSNPS.bed allSNPS_unique.bed sqtlSNPS_unique.bed sqtlSNPS.bed sqtlphenos_unique.bed sqtlphenos.bed)
-#outdir=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/fqtl_output_wasp/20genoPCs_nogenoInHCP/deduped_mincovars+seqPC9_15HCPs/hg38_liftOver/
-# Liftover isoQTL transcript bed
-indir=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/
-infiles=(isoqtl_pheno_tscript.bed)
-outdir=/sc/arion/projects/EPIASD/splicingQTL/analysis/annotationBEDs/PECisoqtls/hg38_liftOver/
+indir=$1 # directory containing the bed file to lift over
+inbed=$2 # bed file to lift over
+outdir=$3 # directory to place the processed files in
+addchr=$4 # should 'chr' be prepended to column 1 {true,false}?
 
 mkdir -p ${outdir}
 
-for file in ${infiles[@]}
-do
-  sed 's/^/chr/g' ${indir}${file} > ${outdir}${file}_hg19withChr
-  liftOver -bedPlus=6 ${outdir}${file}_hg19withChr ${chainfile} ${outdir}${file%.bed}_hg38.bed ${outdir}${file%.bed}_unmapped.bed 
-done
+if [ $addchr == 'true' ]
+then
+  sed 's/^/chr/g' ${indir}${inbed} > ${outdir}${inbed}.hg19withChr
+else
+  cp ${indir}${inbed} ${outdir}${inbed}.hg19withChr
+fi
+
+liftOver -bedPlus=6 ${outdir}${inbed}.hg19withChr ${chainfile} ${outdir}${inbed%.bed}.hg38.bed ${outdir}${inbed%.bed}.unmapped.bed
+
+rm ${outdir}${inbed}.hg19withChr

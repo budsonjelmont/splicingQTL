@@ -1,7 +1,7 @@
 #!/bin/bash
 ml plink/1.90
 
-invcf=/sc/arion/projects/EPIASD/splicingQTL/intermediate_files/geno_wasp/Capstone4.sel.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.COPY.vcf
+invcf=/sc/arion/projects/EPIASD/splicingQTL/output/vcf/Capstone4.sel.hasPhenosOnly.idsync.2allele.maf01.mind05.geno05.hwe1e-6.deduped.vcf
 idout=${invcf%.*}
 
 plink --vcf $invcf --double-id --write-snplist --make-bed --out $idout

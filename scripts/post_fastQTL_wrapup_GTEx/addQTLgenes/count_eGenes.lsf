@@ -19,7 +19,7 @@ annotbed=$6 # bed file of GENCODE transcripts
 
 outfile=${feattype}-gene_annotations.txt # Name of overlap file produced by bedtools
 
-pydir=/sc/arion/projects/EPIASD/splicingQTL/scripts/fastQTL/addQTLgenes # Directory containing the count_eGenes.py script
+pydir=/sc/arion/projects/EPIASD/splicingQTL/scripts/post_fastQTL_wrapup_GTEx/addQTLgenes # Directory containing the count_eGenes.py script
 
 ml bedtools
 ml python/3.7.3
@@ -29,5 +29,5 @@ ml python/3.7.3
 bedtools intersect -wo -s -f 1.0 -a $fqtldir/$fqtlbed -b $annotdir/$annotbed > $fqtldir/$outfile
 
 # Read the output file & report the number of unique gene IDs
-echo "python3 $pydir/count_eGenes.py $fqtldir/$outfile $fqtldir/$fqtlres $feattype --tag _jmb --annotate_qtlres"
-python3 $pydir/count_eGenes.py $fqtldir/$outfile $fqtldir/$fqtlres $feattype --tag _jmb --annotate_qtlres
+echo "python3 $pydir/count_eGenes.py $fqtldir/$outfile $fqtldir/$fqtlres $feattype --tag _jmb"
+python3 $pydir/count_eGenes.py $fqtldir/$outfile $fqtldir/$fqtlres $feattype --tag _jmb

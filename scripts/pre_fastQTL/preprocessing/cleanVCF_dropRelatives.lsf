@@ -11,14 +11,15 @@
 module load plink/1.90
 ml python/3.7.3
 
-vcfdir=/sc/arion/projects/EPIASD/PsychENCODE_phase12_genotypes/Capstone4VCFreformat/
-vcffile=Capstone4.sel.idsync.2allele
+vcfdir=/sc/arion/scratch/belmoj01/splicingQTL/
+vcffile=Capstone4.sel.hasPhenosOnly.idsync.2allele.maf01.mind05.geno05.hwe1e-6
+makerelatedexcludepy=/sc/arion/projects/EPIASD/ancestry_pca/pca/make_related_exclude_list.py
 
 # Generate missing genotype stats
 plink --vcf $vcfdir/$vcffile.vcf --double-id --missing --out $vcfdir/$vcffile.missingStats
 # Make relatedness report
-plink --vcf $vcfdir/$vcffile.vcf --double-id --genome --out  $vcfdir/$vcffile.relatedness
+plink --vcf $vcfdir/$vcffile.vcf --double-id --genome --out $vcfdir/$vcffile.relatedness
 # Make list of people to drop
-python3 makeRelatedExcludeList.py  $vcfdir/$vcffile.missingStats.imiss  $vcfdir/$vcffile.relatedness.genome
+python3 $makerelatedexcludepy $vcfdir/$vcffile.missingStats.imiss $vcfdir/$vcffile.relatedness.genome
 # Drop them
 plink --vcf $vcfdir/$vcffile.vcf --autosome --double-id --remove $vcfdir/SamplesToExcludeForPCA.txt --out $vcfdir/$vcffile.deduped --recode vcf-iid

@@ -2,14 +2,18 @@
 import numpy as np
 import pandas as pd
 
-resdir='/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/results_finished/'
+resdir='/sc/arion/projects/EPIASD/splicingQTL/analysis/VEP/results_noRegulatory_111620/'
 
-resfiles = {'our_sSNPs':resdir+'our_sQTLSNPs_offlineRun',
-  'Walker_sSNPs':resdir+'Walker_sQTLSNPs_offlineRun',
-  'Raj_sSNPs':resdir+'Raj_sQTLSNPs_offlineRun',
-  'PEC_eSNPs':resdir+'PEC_eQTLSNPs_offlineRun',
-  'PEC_isoSNPs':resdir+'PEC_isoQTLSNPs_offlineRun',
-  'our_nonQTLSNPs':resdir+'our_nonQTLSNPs_offlineRun'
+resfiles = {'our_sSNPs':resdir+'OurStudy_sQTLSNPs',
+  'our_nonQTLSNPs':resdir+'OurStudy_allnonsQTLSNPs_withinCisWindow',
+  'Walker_sSNPs':resdir+'Walker_sQTLSNPs',
+  'Raj_sSNPs':resdir+'Raj_sQTLSNPs',
+  'PEC_eSNPs':resdir+'PEC_eQTLSNPs',
+  'PEC_noneSNPs':resdir+'PEC_allnoneQTLSNPs_withinCisWindow',
+  'PEC_isoSNPs':resdir+'PEC_isoQTLSNPs',
+  'PEC_nonisoSNPs':resdir+'PEC_allnonisoQTLSNPs_withinCisWindow',
+  'PEC_tSNPs':resdir+'PEC_tQTLSNPs',
+  'PEC_nontSNPs':resdir+'PEC_allnontQTLSNPs_withinCisWindow'
 }
 
 # Column # containing the annotation to summarize

@@ -1,18 +1,20 @@
 #!/bin/bash
 # To run: bsub [options] < this_scripts_name
 #BSUB -J runVarPt
-#BSUB -q private
-#BSUB -m bashia02
+#BSUB -P acc_pintod02b
+#BSUB -q express
 #BSUB -n 21
-#BSUB -W 3:00
-#BSUB -R rusage[mem=25360]
-#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/runVarPt%J_output.txt
+#BSUB -W 6:00
+#BSUB -R rusage[mem=75000]
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/runVarPt_minCovars_%J_output.txt
 
-resultsDir='/sc/orga/projects/EPIASD/splicingQTL/varPart/results/092419_20genoPCS_minCovars+seqPC9_noHCP_lambda1.1.1/'
+resultsDir=/sc/arion/projects/EPIASD/splicingQTL/output/varPart/leafcutter_analysis1
 
 module load R
 
-Rscript /sc/orga/projects/EPIASD/splicingQTL/varPart/check_covars_varPt_minCovars.R
-mv varPart ${resultsDir}
-mv varpart_* ${resultsDir}
-mv .Rdata ${resultsDir}
+mkdir -p $resultsDir
+
+Rscript /sc/arion/projects/EPIASD/splicingQTL/scripts/pre_fastQTL/varPart/check_covars_varPt_minCovars.R
+mv varPart $resultsDir
+mv varpart_* $resultsDir
+mv .Rdata $resultsDir

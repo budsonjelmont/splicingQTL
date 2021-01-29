@@ -2,18 +2,20 @@
 # To run: bsub [options] < this_scripts_name
 #BSUB -J runVarPt
 #BSUB -P acc_pintod02b
-#BSUB -m bashia02
-#BSUB -q private
-#BSUB -n 21
-#BSUB -W 5:00
-#BSUB -R rusage[mem=28400]
-#BSUB -o /sc/orga/projects/EPIASD/splicingQTL/lsf_output/runVarPt%J_output.txt
+#BSUB -q premium
+#BSUB -n 26
+#BSUB -W 8:00
+#BSUB -R rusage[mem=140000]
+#BSUB -o /sc/arion/projects/EPIASD/splicingQTL/lsf_output/runVarPt%J_output.txt
 
-resultsDir='results/091319_noncorCovars+10HCPs_lambda20.20.20'
+resultsDir=results/092120_allCovars+20genoPCs_lambda1.1.1
 
 module load R
 
-Rscript /sc/orga/projects/EPIASD/splicingQTL/varPart/check_covars_varPt.R
-mv varPart ${resultsDir}
-mv varpart_* ${resultsDir}
-mv .Rdata ${resultsDir}
+mkdir -p $resultsDir
+
+Rscript /sc/arion/projects/EPIASD/splicingQTL/varPart/check_covars_varPt.R
+
+mv varPart $resultsDir
+mv varpart_* $resultsDir
+mv .RData $resultsDir
